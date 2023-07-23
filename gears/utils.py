@@ -3,7 +3,7 @@ import json
 from typing import Generator, List, Dict, Union
 
 
-def extract_json_objects(
+def extract_json(
     text, decoder=json.JSONDecoder()
 ) -> Generator[Union[Dict, List], None, None]:
     """
@@ -45,4 +45,4 @@ def extract_first_json(text: str) -> Union[Dict, List]:
     Returns:
         Union[Dict, List]: The first JSON object or array.
     """
-    return next(extract_json_objects(text))
+    return next(extract_json(text))

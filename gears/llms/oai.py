@@ -9,6 +9,7 @@ from tenacity import (
     wait_random_exponential,
 )  # for exponential backoff
 import openai
+from typing import Any
 
 import logging
 
@@ -50,6 +51,14 @@ class OpenAIChat(BaseLLM):
         self.api_kwargs = kwargs
         self.max_retries = max_retries
 
+        # strip date from model
+        split_model = self.model.split("-")
+        if len(split_model) >= 4 and "k" not in split_model[-1]:
+            # Truncade the last part of the model name
+            self.model_base = "-".join(split_model[:-1])
+        else:
+            self.model_base = self.model
+
     def retry_policy(self):
         return retry(
             wait=wait_random_exponential(min=1, max=60),
@@ -76,27 +85,34 @@ class OpenAIChat(BaseLLM):
         prompt: str,
         history: History,
         message_kwargs: dict = {},
-    ) -> str:
+    ) -> Any:
         # Construct chat history
         curr_message = Message(role="user", content=prompt, **message_kwargs)
         history.add(curr_message)
-        messages = [m.dict() for m in history]
+        messages = [m.model_dump() for m in history]
         request = {
             "model": self.model,
             "messages": messages,
             **self.api_kwargs,
         }
         response = await self.chat_api_call(request)
-        returned_message = response["choices"][0]["message"]["content"].strip()
-        history.add(Message(role="system", content=returned_message))
+        returned_message = response["choices"][0]["message"]["content"]
+        history.add(
+            Message(
+                role=response["choices"][0]["message"]["role"],
+                content=returned_message,
+            )
+        )
 
         # Increment cost
         try:
             prompt_tokens = response["usage"]["prompt_tokens"]
             completion_tokens = response["usage"]["completion_tokens"]
+
             cost = (
-                OPENAI_PRICING_MAP[self.model]["prompt_tokens"] * prompt_tokens
-                + OPENAI_PRICING_MAP[self.model]["completion_tokens"]
+                OPENAI_PRICING_MAP[self.model_base]["prompt_tokens"]
+                * prompt_tokens
+                + OPENAI_PRICING_MAP[self.model_base]["completion_tokens"]
                 * completion_tokens
             )
             history.increment_cost(cost)
@@ -105,4 +121,4 @@ class OpenAIChat(BaseLLM):
                 f"Could not find pricing for model {self.model}. Not incrementing cost."
             )
 
-        return returned_message
+        return response

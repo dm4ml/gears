@@ -22,23 +22,23 @@ class Gear:
 
     async def run(self, data: BaseModel, history: History, **kwargs):
         # Construct the template with the pydantic model
-        prompt = self.template.render(data.dict())
+        prompt = self.template.render(data.model_dump())
 
         # Call the model
         logger.info(f"Running model with prompt: {prompt}")
-        reply = await self.model.run(prompt, history, **kwargs)
+        response = await self.model.run(prompt, history, **kwargs)
 
-        # Transform the data from the reply
+        # Transform the data from the response
         try:
             relevant_args = inspect.getfullargspec(self.transform)[0]
             relevant_data_dict = {
                 key: value
-                for key, value in data.dict().items()
+                for key, value in data.model_dump().items()
                 if key in relevant_args
             }
-            reply = self.transform(reply, **relevant_data_dict)
+            response = self.transform(response, **relevant_data_dict)
             # Verify that the structured data is a pydantic model
-            if not isinstance(reply, BaseModel):
+            if not isinstance(response, BaseModel):
                 raise TypeError(
                     "Transform must return a pydantic model instance"
                 )
@@ -47,21 +47,19 @@ class Gear:
 
         # Load which other gear to run, if any
         try:
-            child = self.switch(reply)
-            return await child.run(reply, history, **kwargs)
+            child = self.switch(response)
+            return await child.run(response, history, **kwargs)
         except NotImplementedError:
             pass
 
-        # If there is no child, return the reply
-        return reply
+        # If there is no child, return the response
+        return response
 
     def template(self) -> str:
-        raise NotImplementedError(
-            "Gear must implement prompt template if relying on a model"
-        )
+        raise NotImplementedError("Gear must implement prompt template")
 
-    def transform(self, reply: str, **kwargs) -> BaseModel:
+    def transform(self, response: dict, **kwargs) -> BaseModel:
         raise NotImplementedError
 
-    def switch(self, reply: BaseModel, **kwargs) -> "Gear":
+    def switch(self, response: dict, **kwargs) -> "Gear":
         raise NotImplementedError

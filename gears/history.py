@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class Message(BaseModel):
@@ -10,9 +10,7 @@ class Message(BaseModel):
         content (str): The content of the message. A string.
     """
 
-    class Config:
-        # Set `allow_extra` to True to allow extra fields
-        allow_extra = True
+    model_config = ConfigDict(extra="allow")
 
     role: str = Field(
         ...,
