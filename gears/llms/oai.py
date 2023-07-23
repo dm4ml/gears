@@ -22,6 +22,26 @@ def retry_after_attempts(max_retries: int):
     )
 
 
+OPENAI_PRICING_MAP = {
+    "gpt-3.5-turbo": {
+        "prompt_tokens": float(0.0015 / 1000),
+        "completion_tokens": float(0.002 / 1000),
+    },
+    "gpt-3.5-turbo-16k": {
+        "prompt_tokens": float(0.003 / 1000),
+        "completion_tokens": float(0.004 / 1000),
+    },
+    "gpt-4": {
+        "prompt_tokens": float(0.03 / 1000),
+        "completion_tokens": float(0.06 / 1000),
+    },
+    "gpt-4-32k": {
+        "prompt_tokens": float(0.06 / 1000),
+        "completion_tokens": float(0.12 / 1000),
+    },
+}
+
+
 class OpenAIChat(BaseLLM):
     def __init__(
         self, model: str = "gpt-3.5-turbo", max_retries: int = 3, **kwargs
@@ -69,4 +89,20 @@ class OpenAIChat(BaseLLM):
         response = await self.chat_api_call(request)
         returned_message = response["choices"][0]["message"]["content"].strip()
         history.add(Message(role="system", content=returned_message))
+
+        # Increment cost
+        try:
+            prompt_tokens = response["usage"]["prompt_tokens"]
+            completion_tokens = response["usage"]["completion_tokens"]
+            cost = (
+                OPENAI_PRICING_MAP[self.model]["prompt_tokens"] * prompt_tokens
+                + OPENAI_PRICING_MAP[self.model]["completion_tokens"]
+                * completion_tokens
+            )
+            history.increment_cost(cost)
+        except KeyError:
+            logger.error(
+                f"Could not find pricing for model {self.model}. Not incrementing cost."
+            )
+
         return returned_message
