@@ -4,5 +4,4 @@ Gears is a lightweight framework for writing control flow with LLMs. It allows y
 
 TODO:
 
-- [ ] Write tests
 - [ ] Write docs
