@@ -1,10 +1,11 @@
 [tool.poetry]
-name = "gears"
-version = "0.1.0"
-description = "Lightweight library for building LLM-native agents."
+name = "gearsllm"
+version = "0.1.1"
+description = "Lightweight library for building LLM-based control flow."
 authors = ["Shreya Shankar <ss.shankar505@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+packages = [{include = "gears"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
