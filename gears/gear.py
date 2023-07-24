@@ -20,7 +20,12 @@ class Gear:
         self.model = model
         self.template = Template(self.template())
 
-    async def run(self, data: BaseModel, history: History, **kwargs):
+    async def run(
+        self,
+        data: BaseModel,
+        history: History,
+        **kwargs,
+    ):
         # Construct the template with the pydantic model
         prompt = self.template.render(data.model_dump())
 
