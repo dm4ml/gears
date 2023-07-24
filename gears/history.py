@@ -1,16 +1,14 @@
 from typing import List
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 
 
-class Message(BaseModel):
+class Message(BaseModel, extra="allow"):
     """This class is a wrapper around a message. It is a building block of a history.
 
     Attributes:
         role (str): The role of the message. Something like "user" or "system".
         content (str): The content of the message. A string.
     """
-
-    model_config = ConfigDict(extra="allow")
 
     role: str = Field(
         ...,
