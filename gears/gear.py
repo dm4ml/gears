@@ -27,7 +27,10 @@ class Gear:
         **kwargs,
     ):
         # Construct the template with the pydantic model
-        prompt = self.template.render(data.model_dump())
+        try:
+            prompt = self.template.render(data.model_dump())
+        except AttributeError:
+            prompt = self.template.render(data.dict())
 
         # Call the model
         logger.info(f"Running model with prompt: {prompt}")

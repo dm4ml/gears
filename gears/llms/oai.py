@@ -89,7 +89,10 @@ class OpenAIChat(BaseLLM):
         # Construct chat history
         curr_message = Message(role="user", content=prompt, **message_kwargs)
         history.add(curr_message)
-        messages = [m.model_dump() for m in history]
+        try:
+            messages = [m.model_dump() for m in history]
+        except AttributeError:
+            messages = [m.dict() for m in history]
         request = {
             "model": self.model,
             "messages": messages,
