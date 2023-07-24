@@ -28,9 +28,11 @@ class Gear:
     ):
         # Construct the template with the pydantic model
         try:
-            prompt = self.template.render(data.model_dump())
+            items = data.model_dump()
         except AttributeError:
-            prompt = self.template.render(data.dict())
+            items = data.dict()
+
+        prompt = self.template.render(items)
 
         # Call the model
         logger.info(f"Running model with prompt: {prompt}")
@@ -41,7 +43,7 @@ class Gear:
             relevant_args = inspect.getfullargspec(self.transform)[0]
             relevant_data_dict = {
                 key: value
-                for key, value in data.model_dump().items()
+                for key, value in items.items()
                 if key in relevant_args
             }
             response = self.transform(response, **relevant_data_dict)
