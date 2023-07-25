@@ -28,7 +28,15 @@ OPENAI_PRICING_MAP = {
         "prompt_tokens": float(0.0015 / 1000),
         "completion_tokens": float(0.002 / 1000),
     },
+    "gpt-35-turbo": {
+        "prompt_tokens": float(0.0015 / 1000),
+        "completion_tokens": float(0.002 / 1000),
+    },
     "gpt-3.5-turbo-16k": {
+        "prompt_tokens": float(0.003 / 1000),
+        "completion_tokens": float(0.004 / 1000),
+    },
+    "gpt-35-turbo-16k": {
         "prompt_tokens": float(0.003 / 1000),
         "completion_tokens": float(0.004 / 1000),
     },
@@ -84,7 +92,7 @@ class OpenAIChat(BaseLLM):
         self,
         prompt: str,
         history: History,
-        message_kwargs: dict = {},
+        **message_kwargs: Any,
     ) -> Any:
         # Construct chat history
         curr_message = Message(role="user", content=prompt, **message_kwargs)
@@ -95,6 +103,54 @@ class OpenAIChat(BaseLLM):
             messages = [m.dict() for m in history]
         request = {
             "model": self.model,
+            "messages": messages,
+            **self.api_kwargs,
+        }
+        response = await self.chat_api_call(request)
+        returned_message = response["choices"][0]["message"]["content"]
+        history.add(
+            Message(
+                role=response["choices"][0]["message"]["role"],
+                content=returned_message,
+            )
+        )
+
+        # Increment cost
+        try:
+            prompt_tokens = response["usage"]["prompt_tokens"]
+            completion_tokens = response["usage"]["completion_tokens"]
+
+            cost = (
+                OPENAI_PRICING_MAP[self.model_base]["prompt_tokens"]
+                * prompt_tokens
+                + OPENAI_PRICING_MAP[self.model_base]["completion_tokens"]
+                * completion_tokens
+            )
+            history.increment_cost(cost)
+        except KeyError:
+            logger.error(
+                f"Could not find pricing for model {self.model}. Not incrementing cost."
+            )
+
+        return response
+
+
+class AzureOpenAIChat(OpenAIChat):
+    async def run(
+        self,
+        prompt: str,
+        history: History,
+        **message_kwargs: Any,
+    ) -> Any:
+        # Construct chat history
+        curr_message = Message(role="user", content=prompt, **message_kwargs)
+        history.add(curr_message)
+        try:
+            messages = [m.model_dump() for m in history]
+        except AttributeError:
+            messages = [m.dict() for m in history]
+        request = {
+            "engine": self.model,
             "messages": messages,
             **self.api_kwargs,
         }
