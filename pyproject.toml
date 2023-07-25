@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gearsllm"
-version = "0.1.8"
+version = "0.1.9"
 description = "Lightweight library for building LLM-based control flow."
 authors = ["Shreya Shankar <ss.shankar505@gmail.com>"]
 license = "MIT"
