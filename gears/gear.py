@@ -58,7 +58,14 @@ class Gear:
         # Load which other gear to run, if any
         try:
             child = self.switch(response)
-            return await child.run(response, history, **kwargs)
+            if isinstance(child, Gear):
+                return await child.run(response, history, **kwargs)
+            elif not child:
+                logger.info("No child gear to run. Returning response.")
+                return response
+            else:
+                raise TypeError(f"Switch must return a Gear instance or None.")
+
         except NotImplementedError:
             pass
 

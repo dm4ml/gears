@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from gears import Gear, History
 from gears.llms import Echo
 import pytest
+import random
 
 
 class Input(BaseModel):
@@ -75,6 +76,8 @@ async def test_three_gears_fork():
                 return TestGearLeft(echo_model)
             elif response.name == "right":
                 return TestGearRight(echo_model)
+            elif response.name == "stop":
+                return None
             else:
                 raise ValueError("Name must be left or right")
 
@@ -107,6 +110,14 @@ async def test_three_gears_fork():
     assert result.name == "right"
     assert result.completion == "Right bye right"
     assert len(history) == 4
+
+    # Try stop
+    gear = TestGear(echo_model)
+    history = History()
+    result = await gear.run(Input(name="stop"), history)
+    assert result.name == "stop"
+    assert result.completion == "Hello stop"
+    assert len(history) == 2
 
     # Try wrong
     gear = TestGear(echo_model)
