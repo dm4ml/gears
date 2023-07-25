@@ -18,7 +18,7 @@ class Gear:
         model: BaseLLM,
     ):
         self.model = model
-        self.template = Template(self.template())
+        self.template = self.template()
 
     async def run(
         self,
@@ -32,7 +32,7 @@ class Gear:
         except AttributeError:
             items = data.dict()
 
-        prompt = self.template.render(items)
+        prompt = Template(self.template).render(items)
 
         # Call the model
         logger.info(f"Running model with prompt: {prompt}")
