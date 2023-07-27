@@ -45,4 +45,7 @@ def extract_first_json(text: str) -> Union[Dict, List]:
     Returns:
         Union[Dict, List]: The first JSON object or array.
     """
-    return next(extract_json(text))
+    try:
+        return next(extract_json(text))
+    except StopIteration:
+        raise StopIteration(f"No JSON found in text: {text}")
