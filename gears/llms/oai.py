@@ -139,11 +139,12 @@ class AzureOpenAIChat(OpenAIChat):
     def __init__(
         self,
         model: str = "gpt-3.5-turbo",
-        deployment: str = "gpt-35-turbo",
+        deployment_id: str = "gpt-35-turbo",
         max_retries: int = 3,
         **kwargs,
     ):
-        self.deployment = deployment
+        self.deployment_id = deployment_id
+
         super().__init__(model=model, max_retries=max_retries, **kwargs)
 
     async def run(
@@ -160,7 +161,7 @@ class AzureOpenAIChat(OpenAIChat):
         except AttributeError:
             messages = [m.dict() for m in history]
         request = {
-            "deployment": self.deployment,
+            "deployment_id": self.deployment_id,
             "messages": messages,
             **self.api_kwargs,
         }
