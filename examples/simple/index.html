@@ -776,16 +776,12 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">gears.utils</span> <span class="kn">import</span> <span class="n">extract_first_json</span>
 
 <span class="k">class</span> <span class="nc">SQLGear</span><span class="p">(</span><span class="n">Gear</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">OpenAIChat</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">error</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;Your query failed to execute with the following error: {{ exception }}</span><span class="se">\n\n</span><span class="s2">Please try again. Output the SQL as a JSON with key `sql` and value equal to the SQL query for me to run.&quot;</span>
+    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">SQLContext</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Your query failed to execute with the following error: {{ context.exception }}</span><span class="se">\n\n</span><span class="s2">Please try again. Output the SQL as a JSON with key `sql` and value equal to the SQL query for me to run.&quot;</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;Translate the following query into SQL: {{ nlquery }}</span><span class="se">\n\n</span><span class="s2">Make sure the SQL is executable. Output the SQL as a JSON with key `sql` and value equal to the SQL query for me to run.&quot;</span>
+            <span class="k">return</span> <span class="s2">&quot;Translate the following query into SQL: {{ context.nlquery }}</span><span class="se">\n\n</span><span class="s2">Make sure the SQL is executable. Output the SQL as a JSON with key `sql` and value equal to the SQL query for me to run.&quot;</span>
 
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">SQLContext</span><span class="p">):</span>
         <span class="n">reply</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;message&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -803,7 +799,7 @@
 
     <span class="k">def</span> <span class="nf">switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">SQLContext</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exception</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">SQLGear</span><span class="p">(</span><span class="n">OpenAIChat</span><span class="p">(</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">),</span> <span class="n">error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">SQLGear</span><span class="p">(</span><span class="n">OpenAIChat</span><span class="p">(</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div>

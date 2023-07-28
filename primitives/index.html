@@ -738,7 +738,7 @@
 <span class="k">class</span> <span class="nc">SomeContext</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">&quot;allow&quot;</span><span class="p">):</span> <span class="c1"># extra=&quot;allow&quot; allows extra attributes</span>
     <span class="n">some_attribute</span><span class="p">:</span> <span class="nb">str</span> <span class="c1"># This attribute is required</span>
     <span class="n">some_other_attribute</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># This attribute is optional, and defaults to None</span>
-    <span class="n">some_default_attribute</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span> <span class="c1"># This attribute is optional, and defaults to &quot;default&quot;</span>
+    <span class="n">error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># This attribute is optional, and defaults to False</span>
 </code></pre></div>
 <p>You can also set default values for attributes and allow extra attributes, as shown in the above example. Creating a Pydantic object is as simple as:</p>
 <div class="highlight"><pre><span></span><code><span class="n">context</span> <span class="o">=</span> <span class="n">SomeContext</span><span class="p">(</span><span class="n">some_attribute</span><span class="o">=</span><span class="s2">&quot;some value&quot;</span><span class="p">)</span>
@@ -773,15 +773,11 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">gears</span> <span class="kn">import</span> <span class="n">Gear</span>
 
 <span class="k">class</span> <span class="nc">ExampleGear</span><span class="p">(</span><span class="n">Gear</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">OpenAIChat</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> <span class="c1"># (1)!</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">error</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">SomeContext</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;That story was too long! Keep your story under 100 characters.&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;Write a story about {{ some_attribute }}.&quot;</span>
+            <span class="k">return</span> <span class="s2">&quot;Write a story about {{ context.some_attribute }}.&quot;</span>
 
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">SomeContext</span><span class="p">):</span>
         <span class="n">reply</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;message&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -792,21 +788,20 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">SomeContext</span><span class="p">(</span><span class="n">some_attribute</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">,</span> <span class="n">some_other_attribute</span><span class="o">=</span><span class="n">reply</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">SomeContext</span><span class="p">):</span> <span class="c1"># (2)!</span>
+    <span class="k">def</span> <span class="nf">switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">SomeContext</span><span class="p">):</span> <span class="c1"># (1)!</span>
         <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ExampleGear</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">llm</span><span class="p">)</span> <span class="c1"># (3)!</span>
+            <span class="k">return</span> <span class="n">ExampleGear</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">llm</span><span class="p">)</span> <span class="c1"># (2)!</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span> <span class="c1"># (4)!</span>
+            <span class="k">return</span> <span class="kc">None</span> <span class="c1"># (3)!</span>
 </code></pre></div>
 <ol>
-<li>Constructors are optional. The default constructor takes in a <code>BaseLLM</code> object, i.e., the LLM.</li>
 <li>The <code>switch</code> method is optional. If <code>switch</code> is not implemented or returns <code>None</code>, the workflow will end.</li>
 <li>We want to reprompt for a story if the story is too long</li>
 <li>If the story is not too long, we want to end the workflow</li>
 </ol>
 <p>The way to use a <code>Gear</code> is to initialize it with an LLM object, and then call the <code>run</code> method with an initial context object and history. The <code>run</code> lifecycle is as follows:</p>
 <ol>
-<li><code>run</code> calls <code>template</code> to get a prompt template, passing in the context object attributes as Jinja variables</li>
+<li><code>run</code> calls <code>template</code> to get a prompt template, passing in the context as a Jinja variable</li>
 <li><code>run</code> calls the LLM API with the prompt template and the history</li>
 <li><code>run</code> calls <code>transform</code> with the response from the LLM and the context object. <code>transform</code> returns a new context object. If <code>transform</code> doesn't return a Pydantic object, <code>gears</code> will throw an error.</li>
 <li><code>run</code> calls <code>switch</code> with the new context object. If <code>switch</code> returns <code>None</code>, the workflow will end. Otherwise, the returned <code>Gear</code> will be run with the new context and history.</li>

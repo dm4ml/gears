@@ -769,8 +769,8 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">gears</span> <span class="kn">import</span> <span class="n">Gear</span>
 
 <span class="k">class</span> <span class="nc">ComplimentGear</span><span class="p">(</span><span class="n">Gear</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Write a sentence to make someone named {{ name }} feel good about their character.&quot;</span>
+    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">GreetingContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Write a sentence to make someone named {{ context.name }} feel good about their character.&quot;</span>
 
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">GreetingContext</span><span class="p">):</span>
         <span class="n">reply</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;message&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -781,8 +781,8 @@
         <span class="k">return</span> <span class="n">HumanityGear</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">HumanityGear</span><span class="p">(</span><span class="n">Gear</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Now write a sentence that will make {{ name }} feel good about humanity.&quot;</span>
+    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">GreetingContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Now write a sentence that will make {{ context.name }} feel good about humanity.&quot;</span>
 
     <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">GreetingContext</span><span class="p">):</span>
         <span class="n">reply</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;message&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
