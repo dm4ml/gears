@@ -41,17 +41,17 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://dm4ml.github.io/gears/examples/advanced_control_flow/</loc>
+         <loc>https://dm4ml.github.io/gears/examples/advanced/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://dm4ml.github.io/gears/examples/custom_llms/</loc>
+         <loc>https://dm4ml.github.io/gears/examples/customllm/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://dm4ml.github.io/gears/examples/simple_control_flow/</loc>
+         <loc>https://dm4ml.github.io/gears/examples/simple/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
