@@ -37,7 +37,9 @@ llm = OpenAIChat("gpt-3.5-turbo", temperature=1.0)
 
 ## Create a Gear
 
-A `Gear` is a class that wraps an LLM API call. Here's a set of gears to provide a structured greeting:
+A `Gear` is a class that wraps an LLM API call. A `Gear` has a jinja-formatted prompt template, `transform` method to transform the output of the LLM into a context, and `switch` method to select the next `Gear` to run. `Gear` objects are initialized with an LLM object.
+
+Here's a set of gears to provide a structured greeting:
 
 ```python
 from gears import Gear
@@ -64,9 +66,11 @@ class HumanityGear(Gear):
         return GreetingContext(name=context.name, greeting=context.greeting + " " + reply)
 ```
 
+When running a `Gear`, Gears will automatically call the `transform` method on the response from the LLM, and then call the `switch` method to determine the next `Gear` to run. If `switch` returns `None` or is not implemented, the workflow will end.
+
 ## Create a History
 
-A `History` is a class that wraps messages that flow through gears, like a chat history. Simply initialize a `History` object as follows:
+A `History` is an object that wraps messages that flow through gears, like a chat history. Simply initialize a `History` object as follows:
 
 ```python
 from gears import History
@@ -83,7 +87,8 @@ import asyncio
 
 async def main():
     context = GreetingContext(name="Alice")
-    result_context = await ComplimentGear(llm).run(context, history=history)
+    cgear = ComplimentGear(llm)
+    result_context = await cgear.run(context, history)
     print(f"Greeting: {result_context.greeting}")
     print(f"Chat history:\n{history}")
     print(f"Cost: {history.cost}")
