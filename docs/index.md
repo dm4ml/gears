@@ -10,7 +10,7 @@ Gears is so minimal; it is simply a wrapper around an LLM API call that:
 - Automatically handles LLM API failures with [exponential backoff](https://tenacity.readthedocs.io/en/latest/)
 - Allows you to specify control flow, based on LLM responses, in a simple, declarative way
 
-_We will never suffer the bloat of a venture-backed open source project, and we are committed to **not** growing the codebase beyond what is necessary to support the above features._
+But the real selling point is that _we will not suffer the bloat of a venture-backed open source project; we are committed to **not** growing the codebase beyond what is necessary to support the above features._
 
 ## Installation
 

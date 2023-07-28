@@ -74,7 +74,7 @@ class History:
         ```
 
         Returns:
-            _type_: _description_
+            Any: An iterator over the messages in the history.
         """
         return iter(self._value)
 
