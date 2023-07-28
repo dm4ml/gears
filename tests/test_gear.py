@@ -24,8 +24,8 @@ async def test_single_gear():
         def template(self):
             return "Hello {{ name }}"
 
-        def transform(self, response: str, name: str):
-            return Output(name=name, completion=response)
+        def transform(self, response: str, inp: Input):
+            return Output(name=inp.name, completion=response)
 
     gear = TestGear(echo_model)
     history = History()
@@ -41,18 +41,18 @@ async def test_two_gears_list():
         def template(self):
             return "Hello {{ name }}"
 
-        def transform(self, response: str, name: str):
-            return Output(name=name, completion=response)
+        def transform(self, response: str, inp: Input):
+            return Output(name=inp.name, completion=response)
 
-        def switch(self, response: dict) -> Gear:
+        def switch(self, response) -> Gear:
             return TestGear2(echo_model)
 
     class TestGear2(Gear):
         def template(self):
             return "Bye {{ name }}"
 
-        def transform(self, response: str, name: str):
-            return Output(name=name, completion=response)
+        def transform(self, response: str, out: Output):
+            return Output(name=out.name, completion=response)
 
     gear = TestGear(echo_model)
     history = History()
@@ -68,8 +68,8 @@ async def test_three_gears_fork():
         def template(self):
             return "Hello {{ name }}"
 
-        def transform(self, response: str, name: str):
-            return Output(name=name, completion=response)
+        def transform(self, response: str, inp: Input):
+            return Output(name=inp.name, completion=response)
 
         def switch(self, response) -> Gear:
             if response.name == "left":
@@ -85,15 +85,15 @@ async def test_three_gears_fork():
         def template(self):
             return "Left bye {{ name }}"
 
-        def transform(self, response: str, name: str):
-            return Output(name=name, completion=response)
+        def transform(self, response: str, out: Output):
+            return Output(name=out.name, completion=response)
 
     class TestGearRight(Gear):
         def template(self):
             return "Right bye {{ name }}"
 
-        def transform(self, response: str, name: str):
-            return Output(name=name, completion=response)
+        def transform(self, response: str, out: Output):
+            return Output(name=out.name, completion=response)
 
     # Try left
     gear = TestGear(echo_model)
