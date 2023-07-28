@@ -572,7 +572,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/customllms.md" class="md-nav__link">
+      <a href="../examples/customllm/" class="md-nav__link">
         Custom LLMs
       </a>
     </li>
@@ -756,7 +756,7 @@
 <div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="llm">LLM</h2>
-<p>An <code>LLM</code> is a class that wraps an LLM API call with exponential backoff and adds request and response data to a <code>History</code> object. We support <code>openai</code> chat models out of the box, but you can easily add your own LLMs by subclassing <code>BaseLLM</code> and following <a href="examples/customllms.md">these steps</a>. To initialize an LLM object, you should pass in the name of the chat model you want to use, as well as any other parameters you want the LLM to use (e.g., temperature):</p>
+<p>An <code>LLM</code> is a class that wraps an LLM API call with exponential backoff and adds request and response data to a <code>History</code> object. We support <code>openai</code> chat models out of the box, but you can easily add your own LLMs by subclassing <code>BaseLLM</code> and following <a href="../examples/customllm/">these steps</a>. To initialize an LLM object, you should pass in the name of the chat model you want to use, as well as any other parameters you want the LLM to use (e.g., temperature):</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">gears</span> <span class="kn">import</span> <span class="n">OpenAIChat</span>
 
 <span class="n">llm</span> <span class="o">=</span> <span class="n">OpenAIChat</span><span class="p">(</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
