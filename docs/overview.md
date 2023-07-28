@@ -6,5 +6,5 @@ The documentation is split into the following sections:
 - Examples of Gears in action, including:
   - [Generating Executable SQL](/gears/examples/simple): A simple example of a `Gear` that generates executable SQL from a natural language query.
   - [Generating a Vacation Itinerary](/gears/examples/advanced): A more complex example of a `Gear` that generates a vacation itinerary given user preferences.
-  - [Writing a custom LLM](/gears/examples/customllms): A tutorial on writing a custom LLM for use with Gears.
+  - [Writing a custom LLM](/gears/examples/customllm): A tutorial on writing a custom LLM for use with Gears.
   - [Helpful Utilities](\gears/examples/utils): A collection of helpful utilities for use with Gears.

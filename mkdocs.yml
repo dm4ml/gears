@@ -14,7 +14,7 @@ nav:
       - Examples:
           - Text to SQL (Simple): examples/simple.md
           - Personalized Vacation Planner (Advanced): examples/advanced.md
-          - Custom LLMs: examples/customllms.md
+          - Custom LLMs: examples/customllm.md
           - Utils: examples/utils.md
   - API Reference:
       - gears: api/gears.md
