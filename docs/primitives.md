@@ -14,7 +14,7 @@ from pydantic import BaseModel
 class SomeContext(BaseModel, extra="allow"): # extra="allow" allows extra attributes
     some_attribute: str # This attribute is required
     some_other_attribute: str = None # This attribute is optional, and defaults to None
-    some_default_attribute: str = "default" # This attribute is optional, and defaults to "default"
+    error: bool = False # This attribute is optional, and defaults to False
 ```
 
 You can also set default values for attributes and allow extra attributes, as shown in the above example. Creating a Pydantic object is as simple as:
@@ -71,15 +71,11 @@ Here's an example of a recursive `Gear` that asks a user to write a story, and t
 from gears import Gear
 
 class ExampleGear(Gear):
-    def __init__(self, model: OpenAIChat, error: bool = False, **kwargs): # (1)!
-        self.error = error
-        super().__init__(model, **kwargs)
-
-    def template(self):
-        if self.error:
+    def template(self, context: SomeContext):
+        if context.error:
             return "That story was too long! Keep your story under 100 characters."
         else:
-            return "Write a story about {{ some_attribute }}."
+            return "Write a story about {{ context.some_attribute }}."
 
     def transform(self, response: dict, context: SomeContext):
         reply = response["choices"][0]["message"]["content"].strip()
@@ -90,21 +86,20 @@ class ExampleGear(Gear):
         else:
             return SomeContext(some_attribute=context.some_attribute, some_other_attribute=reply, error=False)
 
-    def switch(self, context: SomeContext): # (2)!
+    def switch(self, context: SomeContext): # (1)!
         if context.error:
-            return ExampleGear(error=True, model=llm) # (3)!
+            return ExampleGear(model=llm) # (2)!
         else:
-            return None # (4)!
+            return None # (3)!
 ```
 
-1. Constructors are optional. The default constructor takes in a `BaseLLM` object, i.e., the LLM.
-2. The `switch` method is optional. If `switch` is not implemented or returns `None`, the workflow will end.
-3. We want to reprompt for a story if the story is too long
-4. If the story is not too long, we want to end the workflow
+1. The `switch` method is optional. If `switch` is not implemented or returns `None`, the workflow will end.
+2. We want to reprompt for a story if the story is too long
+3. If the story is not too long, we want to end the workflow
 
 The way to use a `Gear` is to initialize it with an LLM object, and then call the `run` method with an initial context object and history. The `run` lifecycle is as follows:
 
-1. `run` calls `template` to get a prompt template, passing in the context object attributes as Jinja variables
+1. `run` calls `template` to get a prompt template, passing in the context as a Jinja variable
 2. `run` calls the LLM API with the prompt template and the history
 3. `run` calls `transform` with the response from the LLM and the context object. `transform` returns a new context object. If `transform` doesn't return a Pydantic object, `gears` will throw an error.
 4. `run` calls `switch` with the new context object. If `switch` returns `None`, the workflow will end. Otherwise, the returned `Gear` will be run with the new context and history.

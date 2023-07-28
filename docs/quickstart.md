@@ -45,8 +45,8 @@ Here's a set of gears to provide a structured greeting:
 from gears import Gear
 
 class ComplimentGear(Gear):
-    def template(self):
-        return "Write a sentence to make someone named {{ name }} feel good about their character."
+    def template(self, context: GreetingContext):
+        return "Write a sentence to make someone named {{ context.name }} feel good about their character."
 
     def transform(self, response: dict, context: GreetingContext):
         reply = response["choices"][0]["message"]["content"].strip()
@@ -57,8 +57,8 @@ class ComplimentGear(Gear):
         return HumanityGear(context=context)
 
 class HumanityGear(Gear):
-    def template(self):
-        return "Now write a sentence that will make {{ name }} feel good about humanity."
+    def template(self, context: GreetingContext):
+        return "Now write a sentence that will make {{ context.name }} feel good about humanity."
 
     def transform(self, response: dict, context: GreetingContext):
         reply = response["choices"][0]["message"]["content"].strip()

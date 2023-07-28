@@ -52,16 +52,12 @@ We'll create a `Gear` that takes a natural language query and generates executab
 from gears.utils import extract_first_json
 
 class SQLGear(Gear):
-    def __init__(self, model: OpenAIChat, error: bool = False, **kwargs):
-        self.error = error
-        super().__init__(model, **kwargs)
-
-    def template(self):
-        if self.error:
-            return "Your query failed to execute with the following error: {{ exception }}\n\nPlease try again. Output the SQL as a JSON with key `sql` and value equal to the SQL query for me to run."
+    def template(self, context: SQLContext):
+        if context.exception:
+            return "Your query failed to execute with the following error: {{ context.exception }}\n\nPlease try again. Output the SQL as a JSON with key `sql` and value equal to the SQL query for me to run."
 
         else:
-            return "Translate the following query into SQL: {{ nlquery }}\n\nMake sure the SQL is executable. Output the SQL as a JSON with key `sql` and value equal to the SQL query for me to run."
+            return "Translate the following query into SQL: {{ context.nlquery }}\n\nMake sure the SQL is executable. Output the SQL as a JSON with key `sql` and value equal to the SQL query for me to run."
 
     def transform(self, response: dict, context: SQLContext):
         reply = response["choices"][0]["message"]["content"].strip()
@@ -79,7 +75,7 @@ class SQLGear(Gear):
 
     def switch(self, context: SQLContext):
         if context.exception is not None:
-            return SQLGear(OpenAIChat("gpt-3.5-turbo"), error=True)
+            return SQLGear(OpenAIChat("gpt-3.5-turbo"))
         else:
             return None
 ```

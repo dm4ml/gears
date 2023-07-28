@@ -18,21 +18,15 @@ class Gear:
         model: BaseLLM,
     ):
         self.model = model
-        self.template = self.template()
 
     async def run(
         self,
-        data: BaseModel,
+        context: BaseModel,
         history: History,
         **kwargs,
     ):
         # Construct the template with the pydantic model
-        try:
-            items = data.model_dump()
-        except AttributeError:
-            items = data.dict()
-
-        prompt = Template(self.template).render(items)
+        prompt = Template(self.template(context)).render(context=context)
 
         # Call the model
         logger.info(f"Running model with prompt: {prompt}")
@@ -40,7 +34,7 @@ class Gear:
 
         # Transform the data from the response
         try:
-            response = self.transform(response, data)
+            response = self.transform(response, context)
             # Verify that the structured data is a pydantic model
             if not isinstance(response, BaseModel):
                 raise TypeError(
@@ -66,7 +60,7 @@ class Gear:
         # If there is no child, return the response
         return response
 
-    def template(self) -> str:
+    def template(self, context: BaseModel) -> str:
         raise NotImplementedError("Gear must implement prompt template")
 
     def transform(self, response: dict, **kwargs) -> BaseModel:
