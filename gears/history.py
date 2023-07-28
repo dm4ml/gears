@@ -86,4 +86,4 @@ class History:
                 for message in self._value
             ]
         )
-        return f"History:\n{messages_str}"
+        return messages_str

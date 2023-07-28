@@ -40,13 +40,7 @@ class Gear:
 
         # Transform the data from the response
         try:
-            relevant_args = inspect.getfullargspec(self.transform)[0]
-            relevant_data_dict = {
-                key: value
-                for key, value in items.items()
-                if key in relevant_args
-            }
-            response = self.transform(response, **relevant_data_dict)
+            response = self.transform(response, data)
             # Verify that the structured data is a pydantic model
             if not isinstance(response, BaseModel):
                 raise TypeError(
@@ -78,5 +72,5 @@ class Gear:
     def transform(self, response: dict, **kwargs) -> BaseModel:
         raise NotImplementedError
 
-    def switch(self, response: dict, **kwargs) -> "Gear":
+    def switch(self, response: BaseModel, **kwargs) -> "Gear":
         raise NotImplementedError

@@ -1,10 +1,25 @@
 site_name: Gears Docs
 site_url: https://dm4ml.github.io/gears/
 repo_url: https://github.com/dm4ml/gears
+docs_dir: docs
 repo_name: dm4ml/gears
 remote_branch: gh-pages
 nav:
-  - Home: index.md
+  - Getting Started:
+      - Welcome: index.md
+      - Quickstart: quickstart.md
+  - Documentation:
+      - Overview: overview.md
+      - Examples:
+          - Simple Control Flow: examples/simple_control_flow.md
+          - Advanced Control Flow: examples/advanced_control_flow.md
+          - Custom LLMs: examples/custom_llms.md
+          - Utils: examples/utils.md
+  - API Reference:
+      - gears: api/gears.md
+      - history: api/history.md
+      - llms: api/llms.md
+      - utils: api/utils.md
 
 theme:
   name: material
