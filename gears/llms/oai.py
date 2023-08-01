@@ -55,6 +55,13 @@ class OpenAIChat(BaseLLM):
     def __init__(
         self, model: str = "gpt-3.5-turbo", max_retries: int = 3, **kwargs
     ):
+        """Creates an OpenAI chat API wrapper.
+
+        Args:
+            model (str, optional): String representing the name of the model. Defaults to "gpt-3.5-turbo".
+            max_retries (int, optional): Max number of retries for calling the OpenAI API. Defaults to 3.
+            **kwargs: Any additional kwargs to pass to the OpenAI chat API.
+        """
         self.model = model
         self.api_kwargs = kwargs
         self.max_retries = max_retries
@@ -94,6 +101,18 @@ class OpenAIChat(BaseLLM):
         history: History,
         **message_kwargs: Any,
     ) -> Any:
+        """Calls the OpenAI chat API with the given prompt and chat history.
+        Also adds the response to the chat history and increments the cost.
+
+        Args:
+            prompt (str): Prompt to send to the OpenAI chat API.
+            history (History): History of the chat so far.
+            **message_kwargs (Any): Any additional kwargs to pass to the message.
+
+        Returns:
+            Any: Raw response from the OpenAI chat API.
+        """
+
         # Construct chat history
         curr_message = Message(role="user", content=prompt, **message_kwargs)
         history.add(curr_message)
@@ -107,13 +126,18 @@ class OpenAIChat(BaseLLM):
             **self.api_kwargs,
         }
         response = await self.chat_api_call(request)
-        returned_message = response["choices"][0]["message"]["content"]
-        history.add(
-            Message(
-                role=response["choices"][0]["message"]["role"],
-                content=returned_message,
+        try:
+            returned_message = response["choices"][0]["message"]["content"]
+            history.add(
+                Message(
+                    role=response["choices"][0]["message"]["role"],
+                    content=returned_message,
+                )
             )
-        )
+        except KeyError:
+            logger.error(
+                f"Could not find message and/or role in response: {response}"
+            )
 
         # Increment cost
         try:
@@ -138,11 +162,19 @@ class OpenAIChat(BaseLLM):
 class AzureOpenAIChat(OpenAIChat):
     def __init__(
         self,
-        model: str = "gpt-3.5-turbo",
+        model: str = "gpt-35-turbo",
         deployment_id: str = "gpt-35-turbo",
         max_retries: int = 3,
         **kwargs,
     ):
+        """Creates an Azure OpenAI chat API wrapper.
+
+        Args:
+            model (str, optional): String representing the name of the model. Defaults to "gpt-3.5-turbo". Used only to determine pricing.
+            deployment_id (str, optional): String representing the deployment ID of the model based on your Azure Deployment. Defaults to "gpt-3.5-turbo".
+            max_retries (int, optional): Max number of retries for calling the OpenAI API. Defaults to 3.
+            **kwargs: Any additional kwargs to pass to the chat API.
+        """
         self.deployment_id = deployment_id
 
         super().__init__(model=model, max_retries=max_retries, **kwargs)
@@ -153,6 +185,18 @@ class AzureOpenAIChat(OpenAIChat):
         history: History,
         **message_kwargs: Any,
     ) -> Any:
+        """Calls the Azure OpenAI chat API with the given prompt and chat history. Also adds the response to the chat history and increments the cost.
+
+        Uses the `deployment_id` to call the relevant Azure OpenAI chat API.
+
+        Args:
+            prompt (str): Prompt to send to the OpenAI chat API.
+            history (History): History of the chat so far.
+            **message_kwargs (Any): Any additional kwargs to pass to the message.
+
+        Returns:
+            Any: Raw response from the OpenAI chat API.
+        """
         # Construct chat history
         curr_message = Message(role="user", content=prompt, **message_kwargs)
         history.add(curr_message)
@@ -166,13 +210,18 @@ class AzureOpenAIChat(OpenAIChat):
             **self.api_kwargs,
         }
         response = await self.chat_api_call(request)
-        returned_message = response["choices"][0]["message"]["content"]
-        history.add(
-            Message(
-                role=response["choices"][0]["message"]["role"],
-                content=returned_message,
+        try:
+            returned_message = response["choices"][0]["message"]["content"]
+            history.add(
+                Message(
+                    role=response["choices"][0]["message"]["role"],
+                    content=returned_message,
+                )
             )
-        )
+        except KeyError:
+            logger.error(
+                f"Could not find message and/or role in response: {response}"
+            )
 
         # Increment cost
         try:
