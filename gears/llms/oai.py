@@ -88,6 +88,7 @@ class OpenAIChat(BaseLLM):
     async def _chat_api_call_impl(self, request: dict):
         try:
             response = await openai.ChatCompletion.acreate(**request)
+            assert "content" in response["choices"][0]["message"]
             return response
         except Exception as e:
             logger.warning(
