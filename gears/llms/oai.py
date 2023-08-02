@@ -91,8 +91,8 @@ class OpenAIChat(BaseLLM):
             assert "content" in response["choices"][0]["message"]
             return response
         except Exception as e:
-            logger.warning(
-                f"Exception when calling OpenAI occurred: {e}. Retrying..."
+            logger.error(
+                f"Exception when calling OpenAI occurred: {e}. The response was: {response}"
             )
             raise
 
