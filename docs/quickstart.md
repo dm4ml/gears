@@ -46,7 +46,7 @@ from gears import Gear
 
 class ComplimentGear(Gear):
     def template(self, context: GreetingContext):
-        return "Write a sentence to make someone named {{ context.name }} feel good about their character."
+        return "Write a sentence to make someone named {{ context.name }} feel good about themselves."
 
     def transform(self, response: dict, context: GreetingContext):
         reply = response["choices"][0]["message"]["content"].strip()
@@ -54,9 +54,9 @@ class ComplimentGear(Gear):
         return GreetingContext(name=context.name, greeting=reply)
 
     def switch(self, context: GreetingContext):
-        return HumanityGear(context=context)
+        return WorldGear(context=context)
 
-class HumanityGear(Gear):
+class WorldGear(Gear):
     def template(self, context: GreetingContext):
         return "Now write a sentence that will make {{ context.name }} feel good about humanity."
 
@@ -104,7 +104,7 @@ Chat history:
 [System]: You are an optimistic person who likes to make people feel good about themselves.
 [User]: Write a sentence to make someone named Alice feel good about their character.
 [Assistant]: Alice, your kindness and empathy towards others truly sets you apart and makes the world a better place.
-[User]: Now write a sentence that will make Alice feel good about humanity.
+[User]: Now write a sentence that will make Alice feel good about the world.
 [Assistant]: Alice, your unwavering belief in the goodness of humanity constantly reminds us that there is still so much compassion and love in the world.
 Cost: 0.00027749999999999997
 ```
