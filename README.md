@@ -1,6 +1,6 @@
 # Welcome to Gears
 
-Gears is a lightweight framework for writing control flow with LLMs with **full control over your prompts**. It allows you to build complex chains of actions and conditions, and execute them in a single call.
+Gears is a lightweight tool for writing control flow with LLMs with **full control over your prompts**. It allows you to build complex chains of actions and conditions, and execute them in a single call.
 
 ## Why Gears?
 
