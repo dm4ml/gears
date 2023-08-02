@@ -24,6 +24,7 @@ mkdocs-material = "^9.1.19"
 mkdocstrings-python = "^1.2.1"
 pytkdocs = "^0.16.1"
 linkchecker = "^10.2.1"
+pre-commit = "^3.3.3"
 
 [build-system]
 requires = ["poetry-core"]
