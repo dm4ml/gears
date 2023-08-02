@@ -1,17 +1,18 @@
 """
 This file contains the OpenAI chat API wrappers.
 """
-from gears.history import History, Message
-from gears.llms.base import BaseLLM
-from tenacity import (
+import logging
+from typing import Any
+
+import openai
+from tenacity import (  # for exponential backoff
     retry,
     stop_after_attempt,
     wait_random_exponential,
-)  # for exponential backoff
-import openai
-from typing import Any
+)
 
-import logging
+from gears.history import History, Message
+from gears.llms.base import BaseLLM
 
 logger = logging.getLogger(__name__)
 
@@ -138,9 +139,7 @@ class OpenAIChat(BaseLLM):
                 )
             )
         except KeyError:
-            logger.error(
-                f"Could not find message and/or role in response: {response}"
-            )
+            logger.error(f"Could not find message and/or role in response: {response}")
 
         # Increment cost
         try:
@@ -148,8 +147,7 @@ class OpenAIChat(BaseLLM):
             completion_tokens = response["usage"]["completion_tokens"]
 
             cost = (
-                OPENAI_PRICING_MAP[self.model_base]["prompt_tokens"]
-                * prompt_tokens
+                OPENAI_PRICING_MAP[self.model_base]["prompt_tokens"] * prompt_tokens
                 + OPENAI_PRICING_MAP[self.model_base]["completion_tokens"]
                 * completion_tokens
             )
@@ -222,9 +220,7 @@ class AzureOpenAIChat(OpenAIChat):
                 )
             )
         except KeyError:
-            logger.error(
-                f"Could not find message and/or role in response: {response}"
-            )
+            logger.error(f"Could not find message and/or role in response: {response}")
 
         # Increment cost
         try:
@@ -232,8 +228,7 @@ class AzureOpenAIChat(OpenAIChat):
             completion_tokens = response["usage"]["completion_tokens"]
 
             cost = (
-                OPENAI_PRICING_MAP[self.model_base]["prompt_tokens"]
-                * prompt_tokens
+                OPENAI_PRICING_MAP[self.model_base]["prompt_tokens"] * prompt_tokens
                 + OPENAI_PRICING_MAP[self.model_base]["completion_tokens"]
                 * completion_tokens
             )

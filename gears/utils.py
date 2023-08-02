@@ -1,6 +1,5 @@
 import json
-
-from typing import Generator, List, Dict, Union
+from typing import Dict, Generator, List, Union
 
 
 def extract_json(

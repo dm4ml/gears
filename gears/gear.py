@@ -1,13 +1,12 @@
-from typing import Any, Optional
-from pydantic import BaseModel
+import logging
+from abc import ABC, abstractmethod
+from typing import Optional
 
 from jinja2 import Template
-from abc import ABC, abstractmethod
+from pydantic import BaseModel
 
 from gears.history import History
 from gears.llms.base import BaseLLM
-
-import logging
 
 logger = logging.getLogger(__name__)
 

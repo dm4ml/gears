@@ -1,4 +1,5 @@
 from typing import List
+
 from pydantic import BaseModel, Field
 
 
@@ -14,9 +15,7 @@ class Message(BaseModel, extra="allow"):
         ...,
         description="The role of the message. Something like 'user' or 'system'.",
     )
-    content: str = Field(
-        ..., description="The content of the message. A string."
-    )
+    content: str = Field(..., description="The content of the message. A string.")
 
 
 class History:
