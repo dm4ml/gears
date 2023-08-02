@@ -72,6 +72,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#gears.utils.extract_first_json" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -453,8 +458,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
@@ -505,20 +508,6 @@
     <li class="md-nav__item">
       <a href="../../examples/customllm/" class="md-nav__link">
         Custom LLMs
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../examples/utils/" class="md-nav__link">
-        Utils
       </a>
     </li>
   
@@ -634,9 +623,45 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          utils
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         utils
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#gears.utils.extract_first_json" class="md-nav__link">
+    extract_first_json()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gears.utils.extract_json" class="md-nav__link">
+    extract_json()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -669,7 +694,244 @@
 
   <h1>utils</h1>
 
+<div class="doc doc-object doc-function">
 
+
+
+<h2 id="gears.utils.extract_first_json" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">gears</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">extract_first_json</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Extracts the first JSON object or array in a string representing the output of an LLM.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>text</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The string to parse.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="typing.Union">Union</span>[<span title="typing.Dict">Dict</span>, <span title="typing.List">List</span>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Union[Dict, List]: The first JSON object or array.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>gears/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extract_first_json</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts the first JSON object or array in a string representing the output of an LLM.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text (str): The string to parse.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[Dict, List]: The first JSON object or array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">extract_json</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No JSON found in text: </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="gears.utils.extract_json" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">gears</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">extract_json</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">decoder</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecoder</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Generates all JSON objects or arrays in a string representing the output of an LLM. Copied from ChatGPT.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>text</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The string to parse.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="typing.Generator">Generator</span>[<span title="typing.Union">Union</span>[<span title="typing.Dict">Dict</span>, <span title="typing.List">List</span>], None, None]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Generator[Union[Dict, List], None, None]: A generator of JSON objects or arrays.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>gears/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extract_json</span><span class="p">(</span>
+    <span class="n">text</span><span class="p">,</span> <span class="n">decoder</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecoder</span><span class="p">()</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates all JSON objects or arrays in a string representing the output of an LLM. Copied from ChatGPT.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text (str): The string to parse.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Generator[Union[Dict, List], None, None]: A generator of JSON objects or arrays.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+        <span class="n">match2</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+        <span class="c1"># Find the earliest opening bracket</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">match</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">match</span> <span class="o">&lt;</span> <span class="n">match2</span><span class="p">)</span> <span class="ow">or</span> <span class="n">match2</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">start_pos</span> <span class="o">=</span> <span class="n">match</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_pos</span> <span class="o">=</span> <span class="n">match2</span>
+
+        <span class="k">if</span> <span class="n">start_pos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">raw_decode</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:])</span>
+            <span class="k">yield</span> <span class="n">result</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">start_pos</span> <span class="o">+</span> <span class="n">index</span>
+        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
 
 
 

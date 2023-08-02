@@ -460,8 +460,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
@@ -505,9 +503,75 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Personalized Vacation Planner (Advanced)
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Personalized Vacation Planner (Advanced)
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-high-level-overview" class="md-nav__link">
+    0. High-Level Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-create-a-context" class="md-nav__link">
+    1. Create a Context
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-create-a-gear-to-select-a-destinationseason-and-outdoorindoor-activities" class="md-nav__link">
+    2. Create a Gear to Select a Destination/Season and Outdoor/Indoor Activities
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-create-gears-to-select-the-activities" class="md-nav__link">
+    3. Create Gears to Select the Activities
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-create-a-gear-to-summarize-the-itinerary" class="md-nav__link">
+    4. Create a Gear to Summarize the Itinerary
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-run-the-workflow" class="md-nav__link">
+    5. Run the Workflow
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -522,20 +586,6 @@
     <li class="md-nav__item">
       <a href="../customllm/" class="md-nav__link">
         Custom LLMs
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../utils/" class="md-nav__link">
-        Utils
       </a>
     </li>
   
@@ -677,6 +727,116 @@
 
 
 <h1 id="personalized-vacation-planner-advanced-control-flow">Personalized Vacation Planner (Advanced Control Flow)</h1>
+<p>Sometimes we will want to generate a "tree" of calls to an LLM, where the next call depends on the output of the previous call. For example, suppose we want to generate a structured vacation itinerary for a user that includes activities that are dependent on the climate.</p>
+<h2 id="0-high-level-overview">0. High-Level Overview</h2>
+<p>In this application, we'll use LLMs to:</p>
+<ul>
+<li>Based on a home location, pick a place to travel and season to travel there</li>
+<li>Select 2 activities to do at the destination, including outdoor and indoor activities (weather permitting)</li>
+<li>Summarize the activities into a travel itinerary</li>
+</ul>
+<h2 id="1-create-a-context">1. Create a Context</h2>
+<p>We'll set up a Pydantic model with information we'll extract from the LLM:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">gears</span> <span class="kn">import</span> <span class="n">Gear</span><span class="p">,</span> <span class="n">History</span><span class="p">,</span> <span class="n">OpenAIChat</span>
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span> <span class="nn">asyncio</span>
+
+<span class="k">class</span> <span class="nc">Suggestion</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">home</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">destination</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">season</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">activities</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">itinerary</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+</code></pre></div>
+<h2 id="2-create-a-gear-to-select-a-destinationseason-and-outdoorindoor-activities">2. Create a Gear to Select a Destination/Season and Outdoor/Indoor Activities</h2>
+<p>We'll create a <code>Gear</code> that takes a home location and generates a destination and season to travel there:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">gears.utils</span> <span class="kn">import</span> <span class="n">extract_first_json</span>
+
+<span class="k">class</span> <span class="nc">DestinationSelection</span><span class="p">(</span><span class="n">Gear</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Suggest a city within a 4-5 hour flight that someone who lives in {{ context.home }} can travel to for a vacation. Pick a season that is best to travel to this destination in. Output the destination and season as a JSON with keys `destination` and `season` and values equal to the destination and season, respectively.&quot;</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="n">reply</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;message&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="c1"># Get JSON from reply and execute it</span>
+        <span class="n">answer</span> <span class="o">=</span> <span class="n">extract_first_json</span><span class="p">(</span><span class="n">reply</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Suggestion</span><span class="p">(</span><span class="n">home</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">home</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">answer</span><span class="p">[</span><span class="s2">&quot;destination&quot;</span><span class="p">],</span> <span class="n">season</span><span class="o">=</span><span class="n">answer</span><span class="p">[</span><span class="s2">&quot;season&quot;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">IndoorOrOutdoor</span><span class="p">(</span><span class="n">OpenAIChat</span><span class="p">(</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">))</span>
+
+<span class="k">class</span> <span class="nc">IndoorOrOutdoor</span><span class="p">(</span><span class="n">Gear</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Based on the expected weather at the destination in the {{ context.season }} season, can the person do outdoor activities? Output your answer as a JSON with key `outdoor` and value equal to `yes` or `no`, respectively.&quot;</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="n">reply</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;message&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="c1"># Get JSON from reply and execute it</span>
+        <span class="n">answer</span> <span class="o">=</span> <span class="n">extract_first_json</span><span class="p">(</span><span class="n">reply</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Suggestion</span><span class="p">(</span><span class="n">home</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">home</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">answer</span><span class="p">[</span><span class="s2">&quot;destination&quot;</span><span class="p">],</span> <span class="n">season</span><span class="o">=</span><span class="n">answer</span><span class="p">[</span><span class="s2">&quot;season&quot;</span><span class="p">],</span> <span class="n">outdoor</span><span class="o">=</span><span class="n">answer</span><span class="p">[</span><span class="s2">&quot;outdoor&quot;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">outdoor</span> <span class="o">==</span> <span class="s2">&quot;yes&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">OutdoorActivitySelection</span><span class="p">(</span><span class="n">OpenAIChat</span><span class="p">(</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">IndoorActivitySelection</span><span class="p">(</span><span class="n">OpenAIChat</span><span class="p">(</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">))</span>
+</code></pre></div>
+<h2 id="3-create-gears-to-select-the-activities">3. Create Gears to Select the Activities</h2>
+<p>Now, we'll ask the LLM to select activities to do at the destination:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">OutdoorActivitySelection</span><span class="p">(</span><span class="n">Gear</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Suggest a popular outdoor activity to do in the city of {{ context.destination }} during the season of {{ context.season }}.&quot;</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="n">reply</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;message&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="n">activities</span> <span class="o">=</span> <span class="p">[</span><span class="n">reply</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Suggestion</span><span class="p">(</span><span class="n">home</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">home</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="n">season</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">season</span><span class="p">,</span> <span class="n">activities</span><span class="o">=</span><span class="n">activities</span><span class="p">,</span> <span class="n">outdoor</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">outdoor</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">IndoorOrOutdoor</span><span class="p">(</span><span class="n">OpenAIChat</span><span class="p">(</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">))</span>
+
+<span class="k">class</span> <span class="nc">IndoorActivitySelection</span><span class="p">(</span><span class="n">Gear</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="c1"># If there is already an indoor activity, prompt for a different one</span>
+        <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">activities</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Suggest a different popular indoor activity to do in the city of {{ context.destination }} during the season of {{ context.season }}.&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Suggest a popular indoor activity to do in the city of {{ context.destination }} during the season of {{ context.season }}.&quot;</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+       <span class="n">reply</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;message&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="n">activities</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">activities</span> <span class="o">+</span> <span class="p">[</span><span class="n">reply</span><span class="p">]</span> <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">activities</span> <span class="k">else</span> <span class="p">[</span><span class="n">reply</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Suggestion</span><span class="p">(</span><span class="n">home</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">home</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="n">season</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">season</span><span class="p">,</span> <span class="n">activities</span><span class="o">=</span><span class="n">activities</span><span class="p">,</span> <span class="n">outdoor</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">outdoor</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">outdoor</span> <span class="o">!=</span> <span class="s2">&quot;yes&quot;</span><span class="p">:</span>
+            <span class="c1"># Need another indoor activity</span>
+            <span class="k">return</span> <span class="n">IndoorActivitySelection</span><span class="p">(</span><span class="n">OpenAIChat</span><span class="p">(</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Already have 2 activities. Go to summary</span>
+            <span class="k">return</span> <span class="n">SummarizeItinerary</span><span class="p">(</span><span class="n">OpenAIChat</span><span class="p">(</span><span class="s2">&quot;gpt-3.5-turbo&quot;</span><span class="p">))</span>
+</code></pre></div>
+<p>Note that we have a special case in the <code>IndoorActivitySelection</code> gear: if the LLM recommended not to do outdoor activities at all, then we ask for 2 indoor activities. Otherwise, we ask for 1 indoor activity and 1 outdoor activity.</p>
+<h2 id="4-create-a-gear-to-summarize-the-itinerary">4. Create a Gear to Summarize the Itinerary</h2>
+<p>Finally, we'll ask the LLM to summarize the itinerary:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">SummarizeItinerary</span><span class="p">(</span><span class="n">Gear</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Summarize your suggested activities: {{ context.activities }} into a short personalized vacation itinerary for someone who lives in {{ context.home }} to travel to {{ context.destination }} during the {{ context.season }} season.&quot;</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Suggestion</span><span class="p">):</span>
+        <span class="n">reply</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;message&quot;</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">Suggestion</span><span class="p">(</span><span class="n">home</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">home</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">destination</span><span class="p">,</span> <span class="n">season</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">season</span><span class="p">,</span> <span class="n">activities</span><span class="o">=</span><span class="n">activities</span><span class="p">,</span> <span class="n">outdoor</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">outdoor</span><span class="p">,</span> <span class="n">itinerary</span><span class="o">=</span><span class="n">reply</span><span class="p">)</span>
+</code></pre></div>
+<p>The <code>switch</code> method is not implemented, so the workflow will end after this gear.</p>
+<h2 id="5-run-the-workflow">5. Run the Workflow</h2>
+<p>TODO</p>
 
 
 
