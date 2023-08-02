@@ -6,7 +6,7 @@ While many natural language to SQL systems these days can generate compilable SQ
 SELECT * FROM users WHERE name = "Alice"
 ```
 
-One of the areas where `gears` shines is the ability to validate LLM output and dynamically decide what to do. In this tutorial, we will build a simple `Gear` that generates executable SQL from a natural language query.
+One of the areas where `gears` shines is the ability to validate LLM output and _then_ dynamically decide what to do. In this tutorial, we will build a simple `Gear` that generates executable SQL from a natural language query.
 
 ## 0. Downloads
 
@@ -14,6 +14,7 @@ Assuming you've already configured your `openai` keys, download the Python libra
 
 ```bash
 pip install duckdb
+pip install pandas
 ```
 
 We'll be using the NYC Taxicab dataset, described in [this DuckDB blog post](https://duckdb.org/2021/06/25/querying-parquet.html). Download it using `wget` like so:
@@ -26,8 +27,9 @@ wget https://github.com/cwida/duckdb-data/releases/download/v1.0/taxi_2019_04.pa
 
 We'll set up a `Context`:
 
-```python
+```python linenums="1"
 from gears import Gear, History, OpenAIChat
+from gears.utils import extract_first_json
 from pydantic import BaseModel
 from typing import Any
 
@@ -40,17 +42,22 @@ class SQLContext(BaseModel):
     exception: str = None
     result: Any = None
 
+# Import the NYC Taxi dataset
+duckdb.query(
+    "CREATE TABLE taxi_trips AS SELECT * FROM read_parquet('taxi_2019_04.parquet');"
+)
 table_statistics = duckdb.query("PRAGMA show_tables_expanded;").fetchdf()
-system_prompt = f"Here's some statistics about my database:\n{table_statistics.to_string(index=False)}"
+table_statistics_str = str(table_statistics.iloc[0].to_dict())
+system_prompt = (
+    f"Here's some statistics about my database:\n{table_statistics_str}"
+)
 ```
 
 ## 2. Create a Gear
 
 We'll create a `Gear` that takes a natural language query and generates executable SQL:
 
-```python
-from gears.utils import extract_first_json
-
+```python linenums="24"
 class SQLGear(Gear):
     def template(self, context: SQLContext):
         if context.exception:
@@ -64,7 +71,7 @@ class SQLGear(Gear):
 
         # Get JSON from reply and execute it
         try:
-            sql = extract_first_json(reply, context) # (1)!
+            sql = extract_first_json(reply)["sql"] # (1)!
 
             # Execute SQL
             result = duckdb.query(sql).fetchall()
@@ -86,9 +93,9 @@ class SQLGear(Gear):
 
 We'll run the gear like so:
 
-```python
+```python linenums="51"
 async def main():
-    context = SQLContext(nlquery="How many trips were taken in April 2019?")
+    context = SQLContext(nlquery="How many trips that cost more than $10 were taken in April 2019?")
     history = History(system_message=system_prompt)
     llm = OpenAIChat("gpt-3.5-turbo")
 
@@ -105,9 +112,17 @@ if __name__ == "__main__":
 This will run the gear until it returns `None` from `switch`, denoting a valid SQL query result. The output should look something like this:
 
 ```
-TODO
+SQL query: SELECT COUNT(*) FROM taxi_trips WHERE total_amount > 10 AND pickup_at >= '2019-04-01' AND pickup_at < '2019-05-01'
+SQL query result: [(6281980,)]
+Cost of query: 0.000462
+[System]: Here's some statistics about my database:
+{'database': 'memory', 'schema': 'main', 'name': 'taxi_trips', 'column_names': ['vendor_id', 'pickup_at', 'dropoff_at', 'passenger_count', 'trip_distance', 'rate_code_id', 'store_and_fwd_flag', 'pickup_location_id', 'dropoff_location_id', 'payment_type', 'fare_amount', 'extra', 'mta_tax', 'tip_amount', 'tolls_amount', 'improvement_surcharge', 'total_amount', 'congestion_surcharge'], 'column_types': ['VARCHAR', 'TIMESTAMP', 'TIMESTAMP', 'TINYINT', 'FLOAT', 'VARCHAR', 'VARCHAR', 'INTEGER', 'INTEGER', 'VARCHAR', 'FLOAT', 'FLOAT', 'FLOAT', 'FLOAT', 'FLOAT', 'FLOAT', 'FLOAT', 'FLOAT'], 'temporary': False}
+[User]: Translate the following query into SQL: How many trips that cost more than $10 were taken in April 2019?
+
+Make sure the SQL is executable. Output the SQL as a JSON with key `sql` and value equal to the SQL query for me to run.
+[Assistant]: {"sql": "SELECT COUNT(*) FROM taxi_trips WHERE total_amount > 10 AND pickup_at >= '2019-04-01' AND pickup_at < '2019-05-01'"}
 ```
 
 ### Extra Notes
 
-`gears` is not a full-fledged LLM guardrails library, nor does it intend to be. It is just a lightweight way to add some validation criteria to your LLMs by using control flow. If you want to use a full-fledged LLM guardrails library, I recommend you check out [Guardrails](https://shreyar.github.io/guardrails/), coincidentally written by another person named Shreya.
+`gears` is not a full-fledged LLM guardrails library, nor does it intend to be. It just provides an interface to specify control flow, which can be used for lightweight validation of LLM outfits. If you want to use a full-fledged LLM guardrails library, I recommend you check out [Guardrails](https://shreyar.github.io/guardrails/), coincidentally written by another person named Shreya.

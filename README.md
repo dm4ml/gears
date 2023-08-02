@@ -20,7 +20,16 @@ Gears is available on PyPI, and can be installed with pip:
 pip install gearsllm
 ```
 
+## Dependencies
+
+Gears has the following dependencies:
+
+- `python>=3.9`
+- `pydantic`
+- `jinja2`
+- `tenacity`
+- `openai`
+
 ## ToDos
 
-- [ ] Run examples in docs + add outputs
 - [ ] Add pre-commit hooks with black & isort

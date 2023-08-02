@@ -53,7 +53,7 @@ OPENAI_PRICING_MAP = {
 
 class OpenAIChat(BaseLLM):
     def __init__(
-        self, model: str = "gpt-3.5-turbo", max_retries: int = 3, **kwargs
+        self, model: str = "gpt-3.5-turbo", max_retries: int = 3, **kwargs: Any
     ):
         """Creates an OpenAI chat API wrapper.
 
@@ -168,7 +168,7 @@ class AzureOpenAIChat(OpenAIChat):
         model: str = "gpt-35-turbo",
         deployment_id: str = "gpt-35-turbo",
         max_retries: int = 3,
-        **kwargs,
+        **kwargs: Any,
     ):
         """Creates an Azure OpenAI chat API wrapper.
 

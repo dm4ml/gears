@@ -62,7 +62,7 @@ class History:
 
         self._value.append(message)
 
-    def __iter__(self):
+    def __iter__(self) -> iter:
         """An iterator over the messages in the history.
 
         Usage:
@@ -74,7 +74,7 @@ class History:
         ```
 
         Returns:
-            Any: An iterator over the messages in the history.
+            iter: An iterator over the messages in the history.
         """
         return iter(self._value)
 
