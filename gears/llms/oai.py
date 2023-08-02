@@ -88,11 +88,13 @@ class OpenAIChat(BaseLLM):
     async def _chat_api_call_impl(self, request: dict):
         try:
             response = await openai.ChatCompletion.acreate(**request)
-            assert "content" in response["choices"][0]["message"]
+            assert (
+                "content" in response["choices"][0]["message"]
+            ), "No content in response"
             return response
         except Exception as e:
             logger.error(
-                f"Exception when calling OpenAI occurred: {e}. The response was: {response}"
+                f"Exception when calling OpenAI occurred: {e}. The response was: {response}. History was {request['messages']}."
             )
             raise
 
