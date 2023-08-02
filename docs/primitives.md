@@ -47,7 +47,7 @@ print(history)
 
 ## LLM
 
-An `LLM` is a class that wraps an LLM API call with exponential backoff and adds request and response data to a `History` object. We support `openai` chat models out of the box, but you can easily add your own LLMs by subclassing `BaseLLM` and following [these steps](examples/customllm.md). To initialize an LLM object, you should pass in the name of the chat model you want to use, as well as any other parameters you want the LLM to use (e.g., temperature):
+An LLM is a class that wraps an LLM API call with exponential backoff and adds request and response data to a `History` object. We support `openai` chat models out of the box, but you can easily add your own LLMs by subclassing `BaseLLM` and following [these steps](examples/customllm.md). To initialize an LLM object, you should pass in the name of the chat model you want to use, as well as any other parameters you want the LLM to use (e.g., temperature):
 
 ```python
 from gears import OpenAIChat
