@@ -44,13 +44,18 @@ class Gear(ABC):
             BaseModel: The output context of the gear (result of `transform` method) if no gears are chained in the `switch` method; otherwise, the output context of the last gear in the chain.
         """
         # Construct the template with the pydantic model
-        prompt = Template(self.template(context)).render(context=context)
-        if not isinstance(prompt, str):
-            raise TypeError("Template must return a string")
+        template_str = self.template(context)
+        if template_str is None:
+            # Don't run the gear
+            response = None
+        else:
+            prompt = Template(template_str).render(context=context)
+            if not isinstance(prompt, str):
+                raise TypeError("Template must return a string")
 
-        # Call the model
-        logger.info(f"Running model with prompt: {prompt}")
-        response = await self.model.run(prompt, history, **kwargs)
+            # Call the model
+            logger.info(f"Running model with prompt: {prompt}")
+            response = await self.model.run(prompt, history, **kwargs)
 
         # Transform the data from the response
         response = self.transform(response, context)

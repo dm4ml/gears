@@ -124,3 +124,21 @@ async def test_three_gears_fork():
     history = History()
     with pytest.raises(ValueError):
         result = await gear.run(Input(name="wrong"), history)
+
+
+@pytest.mark.asyncio
+async def test_noop():
+    class TestGear(Gear):
+        def template(self, context):
+            return None
+
+        def transform(self, response: str, inp: Input):
+            assert response is None
+            return Output(name=inp.name, completion="")
+
+    gear = TestGear(echo_model)
+    history = History()
+    result = await gear.run(Input(name="left"), history)
+
+    assert result.name == "left"
+    assert result.completion == ""

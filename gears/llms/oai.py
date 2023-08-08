@@ -17,13 +17,6 @@ from gears.llms.base import BaseLLM
 logger = logging.getLogger(__name__)
 
 
-def retry_after_attempts(max_retries: int):
-    return retry(
-        wait=wait_random_exponential(min=1, max=60),
-        stop=stop_after_attempt(max_retries),
-    )
-
-
 OPENAI_PRICING_MAP = {
     "gpt-3.5-turbo": {
         "prompt_tokens": float(0.0015 / 1000),
@@ -77,7 +70,7 @@ class OpenAIChat(BaseLLM):
 
     def retry_policy(self):
         return retry(
-            wait=wait_random_exponential(min=1, max=60),
+            wait=wait_random_exponential(min=1, max=30),
             stop=stop_after_attempt(self.max_retries),
         )
 
