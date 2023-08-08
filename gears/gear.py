@@ -54,7 +54,7 @@ class Gear(ABC):
                 raise TypeError("Template must return a string")
 
             # Call the model
-            logger.info(f"Running model with prompt: {prompt}")
+            logger.debug(f"Running model with prompt: {prompt}")
             response = await self.model.run(prompt, history, **kwargs)
 
         # Transform the data from the response
@@ -69,7 +69,7 @@ class Gear(ABC):
             if isinstance(child, Gear):
                 return await child.run(response, history, **kwargs)
             elif not child:
-                logger.info("No child gear to run. Returning response.")
+                logger.debug("No child gear to run. Returning response.")
                 return response
             else:
                 raise TypeError(f"Switch must return a Gear instance or None.")
