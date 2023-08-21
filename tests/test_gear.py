@@ -63,6 +63,37 @@ async def test_two_gears_list():
 
 
 @pytest.mark.asyncio
+async def test_editable_history():
+    class TestGear(Gear):
+        def template(self, context):
+            return "Hello {{ context.name }}"
+
+        def transform(self, response: str, inp: Input):
+            return Output(name=inp.name, completion=response)
+
+        def switch(self, response) -> Gear:
+            return TestGear2(echo_model)
+
+    class TestGear2(Gear):
+        def template(self, context):
+            return "Bye {{ context.name }}"
+
+        def editHistory(self, history: History, context: BaseModel) -> History:
+            # Delete the last 2 messages
+            return history[:-2]
+
+        def transform(self, response: str, out: Output):
+            return Output(name=out.name, completion=response)
+
+    gear = TestGear(echo_model)
+    history = History()
+    result = await gear.run(Input(name="world"), history)
+    assert result.name == "world"
+    assert result.completion == "Bye world"
+    assert len(history) == 2
+
+
+@pytest.mark.asyncio
 async def test_three_gears_fork():
     class TestGear(Gear):
         def template(self, context):

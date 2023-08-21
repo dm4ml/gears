@@ -23,6 +23,20 @@ class Gear(ABC):
         """
         self.model = model
 
+    def editHistory(self, history: History, context: BaseModel) -> History:
+        """Optional method to implement that edits the chat history
+        before the gear is run. Default implementation does not
+        modify the history.
+
+        Args:
+            history (History): Chat history so far.
+            context (BaseModel): Context of the gear.
+
+        Returns:
+            History: Edited chat history to be passed into the run method.
+        """
+        return history
+
     async def run(
         self,
         context: BaseModel,
@@ -55,7 +69,8 @@ class Gear(ABC):
 
             # Call the model
             logger.debug(f"Running model with prompt: {prompt}")
-            response = await self.model.run(prompt, history, **kwargs)
+            edited_history = self.editHistory(history, context)
+            response = await self.model.run(prompt, edited_history, **kwargs)
 
         # Transform the data from the response
         response = self.transform(response, context)
@@ -67,7 +82,7 @@ class Gear(ABC):
         try:
             child = self.switch(response)
             if isinstance(child, Gear):
-                return await child.run(response, history, **kwargs)
+                return await child.run(response, edited_history, **kwargs)
             elif not child:
                 logger.debug("No child gear to run. Returning response.")
                 return response

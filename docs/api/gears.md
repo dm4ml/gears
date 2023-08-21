@@ -4,6 +4,7 @@
         members:
             - __init__
             - template
+            - editHistory
             - transform
             - switch
             - run
