@@ -541,7 +541,14 @@
     3. Run the Gear
   </a>
   
-    <nav class="md-nav" aria-label="3. Run the Gear">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-automatically-reprompt-on-transform-failures" class="md-nav__link">
+    4. Automatically Reprompt on Transform Failures
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Automatically Reprompt on Transform Failures">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -840,6 +847,11 @@
 </span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>Make sure the SQL is executable. Output the SQL as a JSON with key `sql` and value equal to the SQL query for me to run.
 </span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>[Assistant]: {&quot;sql&quot;: &quot;SELECT COUNT(*) FROM taxi_trips WHERE total_amount &gt; 10 AND pickup_at &gt;= &#39;2019-04-01&#39; AND pickup_at &lt; &#39;2019-05-01&#39;&quot;}
 </span></code></pre></div>
+<h2 id="4-automatically-reprompt-on-transform-failures">4. Automatically Reprompt on Transform Failures</h2>
+<p>Sometimes, if you just ask the LLM the same question again (if you have a nonzero temperature, of course), the LLM will produce a correct or valid answer. To simply reprompt when your <code>transform</code> method raises some error (e.g., can't parse JSON or SQL), you can use the <code>num_retries_on_transform_error</code> parameter in a <code>Gear</code> constructor:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">gear</span> <span class="o">=</span> <span class="n">SQLGear</span><span class="p">(</span><span class="n">llm</span><span class="p">,</span> <span class="n">num_retries_on_transform_error</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span></code></pre></div>
+<p>This will automatically retry the <code>transform</code> method once if it raises an error. By default, <code>num_retries_on_transform_error</code> is set to 0, meaning that the <code>transform</code> method will not be retried if it raises an error.</p>
 <h3 id="extra-notes">Extra Notes</h3>
 <p><code>gears</code> is not a full-fledged LLM guardrails library, nor does it intend to be. It just provides an interface to specify control flow, which can be used for lightweight validation of LLM outfits. If you want to use a full-fledged LLM guardrails library, I recommend you check out <a href="https://shreyar.github.io/guardrails/">Guardrails</a>, coincidentally written by another person named Shreya.</p>
 
