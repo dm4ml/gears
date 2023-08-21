@@ -15,13 +15,16 @@ class Gear(ABC):
     def __init__(
         self,
         model: BaseLLM,
+        num_retries_on_transform_error: int = 0,
     ):
         """Initializes a Gear with a LLM model.
 
         Args:
             model (BaseLLM): The LLM model to use. Must be an instance of a class that inherits from BaseLLM.
+            num_retries_on_transform_error (int, optional): How many times to retry the LLM if the transform method raises an error. Defaults to 0.
         """
         self.model = model
+        self.num_retries_on_transform_error = num_retries_on_transform_error
 
     def editHistory(self, history: History, context: BaseModel) -> History:
         """Optional method to implement that edits the chat history
@@ -36,6 +39,28 @@ class Gear(ABC):
             History: Edited chat history to be passed into the run method.
         """
         return history
+
+    async def _askModel(
+        self,
+        template_str: str,
+        edited_history: History,
+        context: BaseModel,
+        **kwargs,
+    ):
+        """Internal method to ask the model."""
+        if template_str is None:
+            # Don't run the gear
+            response = None
+        else:
+            prompt = Template(template_str).render(context=context)
+            if not isinstance(prompt, str):
+                raise TypeError("Template must return a string")
+
+            # Call the model
+            logger.debug(f"Running model with prompt: {prompt}")
+            response = await self.model.run(prompt, edited_history, **kwargs)
+
+        return response
 
     async def run(
         self,
@@ -59,22 +84,28 @@ class Gear(ABC):
         """
         # Construct the template with the pydantic model
         template_str = self.template(context)
-        if template_str is None:
-            # Don't run the gear
-            response = None
-            edited_history = history
-        else:
-            prompt = Template(template_str).render(context=context)
-            if not isinstance(prompt, str):
-                raise TypeError("Template must return a string")
-
-            # Call the model
-            logger.debug(f"Running model with prompt: {prompt}")
-            edited_history = self.editHistory(history, context)
-            response = await self.model.run(prompt, edited_history, **kwargs)
+        edited_history = self.editHistory(history, context)
 
         # Transform the data from the response
-        response = self.transform(response, context)
+        num_transform_tries = 0
+
+        while num_transform_tries <= self.num_retries_on_transform_error:
+            response = await self._askModel(
+                template_str, edited_history, context, **kwargs
+            )
+            try:
+                response = self.transform(response, context)
+                break
+            except Exception as e:
+                num_transform_tries += 1
+
+                if num_transform_tries > self.num_retries_on_transform_error:
+                    raise e
+                else:
+                    logger.warning(
+                        f"Transform method raised an error. Asking LLM again..."
+                    )
+
         # Verify that the structured data is a pydantic model
         if not isinstance(response, BaseModel):
             raise TypeError("Transform must return a pydantic model instance")

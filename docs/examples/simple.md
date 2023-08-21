@@ -123,6 +123,16 @@ Make sure the SQL is executable. Output the SQL as a JSON with key `sql` and val
 [Assistant]: {"sql": "SELECT COUNT(*) FROM taxi_trips WHERE total_amount > 10 AND pickup_at >= '2019-04-01' AND pickup_at < '2019-05-01'"}
 ```
 
+## 4. Automatically Reprompt on Transform Failures
+
+Sometimes, if you just ask the LLM the same question again (if you have a nonzero temperature, of course), the LLM will produce a correct or valid answer. To simply reprompt when your `transform` method raises some error (e.g., can't parse JSON or SQL), you can use the `num_retries_on_transform_error` parameter in a `Gear` constructor:
+
+```python
+gear = SQLGear(llm, num_retries_on_transform_error=1)
+```
+
+This will automatically retry the `transform` method once if it raises an error. By default, `num_retries_on_transform_error` is set to 0, meaning that the `transform` method will not be retried if it raises an error.
+
 ### Extra Notes
 
 `gears` is not a full-fledged LLM guardrails library, nor does it intend to be. It just provides an interface to specify control flow, which can be used for lightweight validation of LLM outfits. If you want to use a full-fledged LLM guardrails library, I recommend you check out [Guardrails](https://shreyar.github.io/guardrails/), coincidentally written by another person named Shreya.
