@@ -8,20 +8,16 @@
       
       
       
-        <link rel="canonical" href="https://dm4ml.github.io/gears/api/history/">
+        <link rel="canonical" href="https://dm4ml.github.io/gears/examples/history/">
       
       
-        <link rel="prev" href="../gears/">
-      
-      
-        <link rel="next" href="../llms/">
       
       <link rel="icon" href="../../images/logo.png">
       <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
-        <title>history - Gears Docs</title>
+        <title>Directly Manipulating Chat History - Gears Docs</title>
       
     
     
@@ -75,7 +71,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#gears.History" class="md-skip">
+        <a href="#directly-manipulating-chat-history" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              history
+              Directly Manipulating Chat History
             
           </span>
         </div>
@@ -234,15 +230,13 @@
         
   
   
-    
-  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../gears/" class="md-tabs__link md-tabs__link--active">
+      <a href="../../api/gears/" class="md-tabs__link">
         API Reference
       </a>
     </li>
@@ -480,7 +474,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../examples/simple/" class="md-nav__link">
+      <a href="../simple/" class="md-nav__link">
         Text to SQL (Simple)
       </a>
     </li>
@@ -494,7 +488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../examples/advanced/" class="md-nav__link">
+      <a href="../advanced/" class="md-nav__link">
         Personalized Vacation Planner (Advanced)
       </a>
     </li>
@@ -508,7 +502,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../examples/customllm/" class="md-nav__link">
+      <a href="../customllm/" class="md-nav__link">
         Custom LLMs
       </a>
     </li>
@@ -535,16 +529,16 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
       
       
-      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+      
+      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
       
       
         
@@ -563,7 +557,7 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_3">
           <span class="md-nav__icon md-icon"></span>
           API Reference
@@ -576,7 +570,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../gears/" class="md-nav__link">
+      <a href="../../api/gears/" class="md-nav__link">
         gears
       </a>
     </li>
@@ -588,117 +582,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          history
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../api/history/" class="md-nav__link">
         history
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#gears.History" class="md-nav__link">
-    History
-  </a>
-  
-    <nav class="md-nav" aria-label="History">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#gears.history.History.cost" class="md-nav__link">
-    cost
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#gears.history.History.__init__" class="md-nav__link">
-    __init__()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#gears.history.History.increment_cost" class="md-nav__link">
-    increment_cost()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#gears.history.History.add" class="md-nav__link">
-    add()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#gears.history.History.__getitem__" class="md-nav__link">
-    __getitem__()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#gears.history.History.__len__" class="md-nav__link">
-    __len__()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#gears.history.History.__iter__" class="md-nav__link">
-    __iter__()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#gears.history.History.__str__" class="md-nav__link">
-    __str__()
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#gears.history.Message" class="md-nav__link">
-    Message
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -710,7 +598,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../llms/" class="md-nav__link">
+      <a href="../../api/llms/" class="md-nav__link">
         llms
       </a>
     </li>
@@ -724,7 +612,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../utils/" class="md-nav__link">
+      <a href="../../api/utils/" class="md-nav__link">
         utils
       </a>
     </li>
@@ -756,408 +644,28 @@
   
 
 
-  <h1>history</h1>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h2 id="gears.History" class="doc doc-heading">
-          <code>gears.History</code>
-
-
-</h2>
-
-
-  <div class="doc doc-contents first">
-
-  
-      <p>This class is a wrapper around a list of messages. It is used to keep track of the conversation history with an LLM.</p>
-<p>A history is a list of messages. Each message has a role and content. The role is something like "user" or "system". The content is a string.</p>
-
-
-  
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h3 id="gears.history.History.cost" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">cost</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="gears.history.History.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">system_message</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Message</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cost</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Constructor for the History class.</p>
-
-
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>system_message</code></td>
-          <td>
-                <code>str</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>System message for the LLM to use, if any. E.g., "You are a helpful assistant." Defaults to None.</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>messages</code></td>
-          <td>
-                <code><span title="typing.List">List</span>[<a class="autorefs autorefs-internal" title="gears.history.Message" href="#gears.history.Message">Message</a>]</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>List of messages to initialize the history with. Defaults to None.</p>
-            </div>
-          </td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>cost</code></td>
-          <td>
-                <code>float</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>(float, optional): Cost of the history. Defaults to 0.0 but should be the cost of the messages passed into the constructor.</p>
-            </div>
-          </td>
-          <td>
-                <code>0.0</code>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="gears.history.History.increment_cost" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">increment_cost</span><span class="p">(</span><span class="n">cost</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Increments the cost of the history.</p>
-
-
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>cost</code></td>
-          <td>
-                <code>float</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>Float representing the cost to increment by (in dollars)</p>
-            </div>
-          </td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="gears.history.History.add" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">add</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">)</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Adds a message to the history. Used in LLM run methods.</p>
-
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="gears.history.History.__getitem__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__getitem__</span><span class="p">(</span><span class="n">index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">slice</span><span class="p">])</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Returns the message at the given index.</p>
-
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="gears.history.History.__len__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__len__</span><span class="p">()</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Returns the number of messages in the history.</p>
-
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="gears.history.History.__iter__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__iter__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">iter</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>An iterator over the messages in the history.</p>
-<p>Usage:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">h</span> <span class="o">=</span> <span class="n">History</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">h</span><span class="p">:</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-</span></code></pre></div></p>
-
-
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-<th>Name</th>        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-<td><code>iter</code></td>          <td>
-                <code>iter</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>An iterator over the messages in the history.</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 id="gears.history.History.__str__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__str__</span><span class="p">()</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>String representation of the history.</p>
-
-  </div>
-
-</div>
-
-
-
-  </div>
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h2 id="gears.history.Message" class="doc doc-heading">
-          <code>gears.history.Message</code>
-
-
-</h2>
-
-
-  <div class="doc doc-contents first">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
-
-  
-      <p>This class is a wrapper around a message. It is a building block of a history.</p>
-
-
-
-  <p><strong>Attributes:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>role</code></td>
-          <td>
-                <code>str</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The role of the message. Something like "user" or "system".</p>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td><code>content</code></td>
-          <td>
-                <code>str</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The content of the message. A string.</p>
-            </div>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-            <details class="quote">
-              <summary>Source code in <code>gears/history.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6"></a><a href="#__codelineno-0-6"><span class="linenos" data-linenos=" 6 "></span></a><span class="k">class</span> <span class="nc">Message</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="s2">&quot;allow&quot;</span><span class="p">):</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7"></a><a href="#__codelineno-0-7"><span class="linenos" data-linenos=" 7 "></span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;This class is a wrapper around a message. It is a building block of a history.</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8"></a><a href="#__codelineno-0-8"><span class="linenos" data-linenos=" 8 "></span></a>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9"></a><a href="#__codelineno-0-9"><span class="linenos" data-linenos=" 9 "></span></a><span class="sd">    Attributes:</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10"></a><a href="#__codelineno-0-10"><span class="linenos" data-linenos="10 "></span></a><span class="sd">        role (str): The role of the message. Something like &quot;user&quot; or &quot;system&quot;.</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11"></a><a href="#__codelineno-0-11"><span class="linenos" data-linenos="11 "></span></a><span class="sd">        content (str): The content of the message. A string.</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a><a href="#__codelineno-0-12"><span class="linenos" data-linenos="12 "></span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a><a href="#__codelineno-0-13"><span class="linenos" data-linenos="13 "></span></a>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a><a href="#__codelineno-0-14"><span class="linenos" data-linenos="14 "></span></a>    <span class="n">role</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a><a href="#__codelineno-0-15"><span class="linenos" data-linenos="15 "></span></a>        <span class="o">...</span><span class="p">,</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a><a href="#__codelineno-0-16"><span class="linenos" data-linenos="16 "></span></a>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The role of the message. Something like &#39;user&#39; or &#39;system&#39;.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a><a href="#__codelineno-0-17"><span class="linenos" data-linenos="17 "></span></a>    <span class="p">)</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a><a href="#__codelineno-0-18"><span class="linenos" data-linenos="18 "></span></a>    <span class="n">content</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The content of the message. A string.&quot;</span><span class="p">)</span>
+<h1 id="directly-manipulating-chat-history">Directly Manipulating Chat History</h1>
+<p>Gears provides a way to directly manipulate the chat history before a gear is run. This is useful for multiple reasons:</p>
+<ul>
+<li>With complex chains of gears, the cost of the conversation can quickly add up. By removing unnecessary messages from the history, you can reduce the cost of the conversation.</li>
+<li>You can add messages to the history that are not generated by the LLMs.</li>
+</ul>
+<h2 id="example">Example</h2>
+<p>To directly manipulate chat history, you should implement the <code>editHistory</code> method in your gear. This method takes in a <code>History</code> object and <code>pydantic</code> object and returns a <code>History</code> object. Here is an example of a gear that removes the first 2 (non-system) messages from the history:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">gears</span> <span class="kn">import</span> <span class="n">Gear</span><span class="p">,</span> <span class="n">History</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">class</span> <span class="nc">ExampleGear</span><span class="p">(</span><span class="n">Gear</span><span class="p">):</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">BaseModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="k">return</span> <span class="s2">&quot;Hello, world!&quot;</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="k">def</span> <span class="nf">editHistory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">history</span><span class="p">:</span> <span class="n">History</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">BaseModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">History</span><span class="p">:</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="k">return</span> <span class="n">History</span><span class="p">(</span><span class="n">system_message</span><span class="o">=</span><span class="n">history</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="n">history</span><span class="o">.</span><span class="n">messages</span><span class="p">[</span><span class="mi">3</span><span class="p">:],</span> <span class="n">cost</span><span class="o">=</span><span class="n">history</span><span class="o">.</span><span class="n">cost</span><span class="p">)</span> <span class="c1"># (1)!</span>
 </span></code></pre></div>
-            </details>
-
-  
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-
-  </div>
-
-  </div>
-
-</div>
+<ol>
+<li>It's important to keep the <code>cost</code> of the history the same. Otherwise, the cost of the conversation will be incorrect.</li>
+</ol>
+<p>Running an instance of this gear will remove the first 2 messages from the history before the gear is run for a given context. The <code>run</code> method always calls <code>editHistory</code> before running the gear on a given context. The default implementation of <code>editHistory</code> is to return the history unchanged.</p>
 
 
 
