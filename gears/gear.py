@@ -62,6 +62,7 @@ class Gear(ABC):
         if template_str is None:
             # Don't run the gear
             response = None
+            edited_history = history
         else:
             prompt = Template(template_str).render(context=context)
             if not isinstance(prompt, str):
