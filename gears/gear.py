@@ -82,16 +82,20 @@ class Gear(ABC):
         Returns:
             BaseModel: The output context of the gear (result of `transform` method) if no gears are chained in the `switch` method; otherwise, the output context of the last gear in the chain.
         """
-        # Construct the template with the pydantic model
-        template_str = self.template(context)
-        edited_history = self.editHistory(history, context)
 
         # Transform the data from the response
         num_transform_tries = 0
 
+        # Construct the template with the pydantic model
+        template_str = self.template(context)
+        edited_history = self.editHistory(history, context)
+
         while num_transform_tries <= self.num_retries_on_transform_error:
+            # Copy the edited history so that we don't modify the original
+            edited_history_copy = edited_history.copy()
+
             response = await self._askModel(
-                template_str, edited_history, context, **kwargs
+                template_str, edited_history_copy, context, **kwargs
             )
             try:
                 response = self.transform(response, context)
@@ -114,15 +118,17 @@ class Gear(ABC):
         try:
             child = self.switch(response)
             if isinstance(child, Gear):
-                return await child.run(response, edited_history, **kwargs)
+                response = await child.run(response, edited_history_copy, **kwargs)
             elif not child:
                 logger.debug("No child gear to run. Returning response.")
-                return response
             else:
                 raise TypeError(f"Switch must return a Gear instance or None.")
 
         except NotImplementedError:
             pass
+
+        # Change the original history object
+        history.resetFrom(edited_history_copy)
 
         # If there is no child, return the response
         return response

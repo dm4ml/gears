@@ -107,3 +107,10 @@ class History:
             ]
         )
         return messages_str
+
+    def copy(self):
+        return History(messages=self._value.copy(), cost=self._cost)
+
+    def resetFrom(self, history: "History") -> None:
+        self._value = history._value
+        self._cost = history._cost

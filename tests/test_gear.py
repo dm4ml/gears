@@ -2,6 +2,7 @@ from gears.gear import Gear
 from pydantic import BaseModel
 from gears import Gear, History
 from gears.llms import Echo
+from gears.utils import extract_first_json
 import pytest
 import random
 
@@ -32,6 +33,35 @@ async def test_single_gear():
     result = await gear.run(Input(name="world"), history)
     assert result.name == "world"
     assert result.completion == "Hello world"
+    assert len(history) == 2
+
+
+@pytest.mark.asyncio
+async def test_transform_error():
+    class TestGear(Gear):
+        def __init__(self, model, num_retries_on_transform_error: int = 0):
+            self.counter = 0
+            super().__init__(
+                model,
+                num_retries_on_transform_error=num_retries_on_transform_error,
+            )
+
+        def template(self, context):
+            return '{"hello:}'
+
+        def transform(self, response: str, inp: Input):
+            # Extract the Json
+
+            if self.counter == 0:
+                self.counter += 1
+                obj = extract_first_json(response)
+
+            else:
+                return Output(name=inp.name, completion="Hello world")
+
+    gear = TestGear(echo_model, num_retries_on_transform_error=1)
+    history = History()
+    result = await gear.run(Input(name="world"), history)
     assert len(history) == 2
 
 
