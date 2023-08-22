@@ -26,14 +26,14 @@ class Gear(ABC):
         self.model = model
         self.num_retries_on_transform_error = num_retries_on_transform_error
 
-    def editHistory(self, history: History, context: BaseModel) -> History:
+    def editHistory(self, context: BaseModel, history: History) -> History:
         """Optional method to implement that edits the chat history
         before the gear is run. Default implementation does not
         modify the history.
 
         Args:
-            history (History): Chat history so far.
             context (BaseModel): Context of the gear.
+            history (History): Chat history so far.
 
         Returns:
             History: Edited chat history to be passed into the run method.
@@ -88,7 +88,7 @@ class Gear(ABC):
 
         # Construct the template with the pydantic model
         template_str = self.template(context)
-        edited_history = self.editHistory(history, context)
+        edited_history = self.editHistory(context=context, history=history)
 
         while num_transform_tries <= self.num_retries_on_transform_error:
             # Copy the edited history so that we don't modify the original
