@@ -185,7 +185,7 @@ class Session:
             )
         else:
             self._logger.info(
-                f"No gears ran. The total cost of the session so far is ${self.cost:.4f}."
+                f"No new gears ran. The total cost of the session so far is ${self.cost:.4f}."
             )
 
         return results
