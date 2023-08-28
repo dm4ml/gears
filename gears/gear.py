@@ -1,12 +1,13 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Tuple
 
 from jinja2 import Template
-from pydantic import BaseModel
 
+from gears.example import Example
 from gears.history import History
 from gears.llms.base import BaseLLM
+from gears.llms.oai import OpenAIChat
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 class Gear(ABC):
     def __init__(
         self,
-        model: BaseLLM,
+        model: BaseLLM = OpenAIChat("gpt-3.5-turbo"),
         num_retries_on_transform_error: int = 0,
     ):
         """Initializes a Gear with a LLM model.
@@ -26,13 +27,21 @@ class Gear(ABC):
         self.model = model
         self.num_retries_on_transform_error = num_retries_on_transform_error
 
-    def editHistory(self, context: BaseModel, history: History) -> History:
+        # Initialize the version as the version attribute on the class
+        # Used for iPython notebook extension
+        self._version = getattr(self.__class__, "_version", 1)
+
+    @property
+    def version(self) -> int:
+        return self._version
+
+    def editHistory(self, context: Example, history: History) -> History:
         """Optional method to implement that edits the chat history
         before the gear is run. Default implementation does not
         modify the history.
 
         Args:
-            context (BaseModel): Context of the gear.
+            context (Example): Context of the gear.
             history (History): Chat history so far.
 
         Returns:
@@ -44,7 +53,7 @@ class Gear(ABC):
         self,
         template_str: str,
         edited_history: History,
-        context: BaseModel,
+        context: Example,
         **kwargs,
     ):
         """Internal method to ask the model."""
@@ -62,43 +71,37 @@ class Gear(ABC):
 
         return response
 
-    async def run(
-        self,
-        context: BaseModel,
-        history: History,
-        **kwargs,
-    ) -> BaseModel:
-        """Runs the gear with the given context and history. This is automatically called if executing a gear within a `switch` method; otherwise, it must be called manually for a top-level gear.
+    async def _runWithoutSwitch(
+        self, context: Example, history: History, **kwargs
+    ) -> Tuple[Example, History]:
+        """Runs the gear with the given context and history, without executing
+        a switch method.
 
         Args:
-            context (BaseModel): Input context for the gear. Must be a pydantic model. This is passed to the `template` method, which will construct the prompt for the LLM.
-            history (History): Chat history. This is passed to the LLM's `run` method.
-
-        Raises:
-            TypeError: If the `template` method does not return a string.
-            TypeError: If the `transform` method does not return a pydantic model.
-            TypeError: If the `switch` method does not return a Gear instance or None.
+            context (Example): Input context for the gear. Must be a pydantic model. This is passed to the `template` method, which will construct the prompt for the LLM.
+            history (History): A chat history.
 
         Returns:
-            BaseModel: The output context of the gear (result of `transform` method) if no gears are chained in the `switch` method; otherwise, the output context of the last gear in the chain.
+            Example: The output context of the gear (result of `transform` method).
+            History: The chat history after running the gear. This is a new object and does not modify the original history object.
         """
-
         # Transform the data from the response
         num_transform_tries = 0
 
         # Construct the template with the pydantic model
-        template_str = self.template(context)
-        edited_history = self.editHistory(context=context, history=history)
+        context_copy = context.model_copy()
+        template_str = self.template(context_copy)
+        edited_history = self.editHistory(context=context_copy, history=history)
 
         while num_transform_tries <= self.num_retries_on_transform_error:
             # Copy the edited history so that we don't modify the original
             edited_history_copy = edited_history.copy()
 
             response = await self._askModel(
-                template_str, edited_history_copy, context, **kwargs
+                template_str, edited_history_copy, context_copy, **kwargs
             )
             try:
-                response = self.transform(response, context)
+                response = self.transform(response, context_copy)
                 break
             except Exception as e:
                 num_transform_tries += 1
@@ -111,8 +114,35 @@ class Gear(ABC):
                     )
 
         # Verify that the structured data is a pydantic model
-        if not isinstance(response, BaseModel):
+        if not isinstance(response, Example):
             raise TypeError("Transform must return a pydantic model instance")
+
+        return response, edited_history_copy
+
+    async def run(
+        self,
+        context: Example,
+        history: History,
+        **kwargs,
+    ) -> Example:
+        """Runs the gear with the given context and history. This is automatically called if executing a gear within a `switch` method; otherwise, it must be called manually for a top-level gear.
+
+        Args:
+            context (Example): Input context for the gear. Must be a pydantic model. This is passed to the `template` method, which will construct the prompt for the LLM.
+            history (History): Chat history. This is passed to the LLM's `run` method.
+
+        Raises:
+            TypeError: If the `template` method does not return a string.
+            TypeError: If the `transform` method does not return a pydantic model.
+            TypeError: If the `switch` method does not return a Gear instance or None.
+
+        Returns:
+            Example: The output context of the gear (result of `transform` method) if no gears are chained in the `switch` method; otherwise, the output context of the last gear in the chain.
+        """
+
+        response, edited_history_copy = await self._runWithoutSwitch(
+            context, history, **kwargs
+        )
 
         # Load which other gear to run, if any
         try:
@@ -134,11 +164,11 @@ class Gear(ABC):
         return response
 
     @abstractmethod
-    def template(self, context: BaseModel) -> str:
+    def template(self, context: Example) -> str:
         """Template for the LLM prompt. This is a jinja2 template that will be rendered with the given context.
 
         Args:
-            context (BaseModel): Pydantic model instance that will be used to render the template.
+            context (Example): Pydantic model instance that will be used to render the template.
 
         Raises:
             NotImplementedError: If the gear does not implement this method.
@@ -149,26 +179,26 @@ class Gear(ABC):
         raise NotImplementedError("Gear must implement prompt template")
 
     @abstractmethod
-    def transform(self, response: dict, context: BaseModel) -> BaseModel:
+    def transform(self, response: dict, context: Example) -> Example:
         """Transforms the response from the LLM into a pydantic model instance.
 
         Args:
             response (dict): Raw response from the LLM.
-            context (BaseModel): Input context for the gear. Must be a pydantic model.
+            context (Example): Input context for the gear. Must be a pydantic model.
 
         Raises:
             NotImplementedError: If the gear does not implement this method.
 
         Returns:
-            BaseModel: New context for the gear. Must be a pydantic model instance.
+            Example: New context for the gear. Must be a pydantic model instance.
         """
         raise NotImplementedError("Gear must implement transform method")
 
-    def switch(self, return_context: BaseModel) -> Optional["Gear"]:
+    def switch(self, return_context: Example) -> Optional["Gear"]:
         """Method that determines which gear to run next. This method is called after the `transform` method with the returned context. If this method is not implemented, then the gear will return the response from the `transform` method.
 
         Args:
-            return_context (BaseModel): Output context from the `transform` method.
+            return_context (Example): Output context from the `transform` method.
 
         Returns:
             Optional[Gear]: The next gear to run (an instance). If None, then the gear will return the response from the `transform` method.

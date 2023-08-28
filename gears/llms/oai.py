@@ -7,6 +7,7 @@ from typing import Any
 import openai
 from tenacity import (  # for exponential backoff
     retry,
+    retry_if_not_exception_type,
     stop_after_attempt,
     wait_random_exponential,
 )
@@ -72,6 +73,7 @@ class OpenAIChat(BaseLLM):
         return retry(
             wait=wait_random_exponential(min=1, max=30),
             stop=stop_after_attempt(self.max_retries),
+            retry=retry_if_not_exception_type(openai.error.AuthenticationError),
         )
 
     async def chat_api_call(self, request: dict):
@@ -85,7 +87,12 @@ class OpenAIChat(BaseLLM):
             assert (
                 "content" in response["choices"][0]["message"]
             ), "No content in response"
+
             return response
+
+        except openai.error.AuthenticationError as e:
+            raise e
+
         except Exception as e:
             logger.error(
                 f"Exception when calling OpenAI occurred: {e}. The response was: {response}. History was {request['messages']}."
