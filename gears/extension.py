@@ -30,8 +30,36 @@ def extract_method_code(cell, method_names):
 
 @magics_class
 class GearMagics(Magics):
+    # @cell_magic
+    # def version(self, line, cell):
+    #     """Saves the versions of all gears attached to the session."""
+    #     global gear_classes
+
+    #     # Fetch the user-defined session instance
+    #     session = self.shell.user_ns.get("session", None)
+    #     if not session:
+    #         raise UsageError(
+    #             "Please initialize a Session instance with the name 'session' before using %%version."
+    #         )
+
+    #     # Get the code for all the gears in gear_classes
+    #     # TODO use inspect module
+    #     gear_codes = {
+    #         gear_name: inspect.getsource(gear_classes[gear_name])
+    #         for gear_name in gear_classes
+    #     }
+
+    #     # Get the examples in the session
+    #     examples = session.examples
+
+    #     # Get the results of the examples
+    #     results = asyncio.run(session.run(examples))
+
+    #     # Print the results
+    #     print(results)
+
     @cell_magic
-    def gear_magic(self, line, cell):
+    def gear(self, line, cell):
         global gear_version_counter, gear_code_hashes
 
         # Extract the class name
@@ -50,7 +78,7 @@ class GearMagics(Magics):
         session = self.shell.user_ns.get("session", None)
         if not session:
             raise UsageError(
-                "Please initialize a Session instance with the name 'session' before using %gear_magic."
+                "Please initialize a Session instance with the name 'session' before using %%gear."
             )
 
         # Execute the cell (defines the class in the IPython environment)
@@ -58,6 +86,7 @@ class GearMagics(Magics):
 
         # Manage versioning
         gear_class = self.shell.user_ns[gear_name]
+        session._gear_code[gear_name] = cell
         if gear_name in gear_code_hashes:
             # If the gear's code changed, increment version counter
             if gear_code_hashes[gear_name] != code_hash:

@@ -4,6 +4,7 @@ of examples, multiple gears, and intermediate results when prototyping
 chains of gears.
 """
 import asyncio
+import copy
 import hashlib
 import logging
 from collections import namedtuple
@@ -42,6 +43,8 @@ class Session:
         self.__root_gear = None
         self.__intermediates = {}
         self.__cost = 0.0
+        self.__versions = []
+        self._gear_code = {}
 
         # Set logging level
         logging.basicConfig(
@@ -51,6 +54,10 @@ class Session:
             handlers=[RichHandler()],
         )
         self._logger = logging.getLogger("rich")
+
+    @property
+    def versions(self) -> List[Dict]:
+        return self.__versions
 
     @property
     def cost(self) -> float:
@@ -169,11 +176,12 @@ class Session:
         # Return the final result for this example
         return current_context
 
-    async def run(self) -> List[Example]:
+    async def run(self, version: bool = False) -> List[Example]:
         """
         Runs the root gear on the examples in the session and stores the
         results in the intermediates dictionary.
         """
+
         start_cost = self.cost
         # Process examples in parallel using asyncio.gather
         results = await asyncio.gather(*[self._run_example(ex) for ex in self.examples])
@@ -188,7 +196,20 @@ class Session:
                 f"No new gears ran. The total cost of the session so far is ${self.cost:.4f}."
             )
 
+        if version:
+            self._log_version(results)
+
         return results
+
+    def _log_version(self, results: List[Example]):
+        version = {
+            "root": self.__root_gear.__class__.__name__,
+            "code": copy.deepcopy(self._gear_code),
+            "examples": [ex.model_dump() for ex in self.examples],
+            "results": [ex.model_dump() for ex in results],
+        }
+        self.__versions.append(version)
+        self._logger.info(f"Saving workflow {len(self.__versions)} to session.")
 
     def is_stale(self) -> bool:
         """
