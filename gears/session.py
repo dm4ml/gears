@@ -60,6 +60,13 @@ class Session:
         return self.__versions
 
     @property
+    def last_version(self) -> Dict:
+        if len(self.__versions) == 0:
+            return None
+
+        return self.__versions[-1]
+
+    @property
     def cost(self) -> float:
         return self.__cost
 
