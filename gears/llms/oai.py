@@ -3,7 +3,7 @@ This file contains the OpenAI chat API wrappers.
 """
 import logging
 from typing import Any
-
+from litellm import BudgetManager
 import openai
 from tenacity import (  # for exponential backoff
     retry,
@@ -16,6 +16,12 @@ from gears.llms.base import BaseLLM
 
 logger = logging.getLogger(__name__)
 
+
+budget_manager = BudgetManager(project_name="test_project")
+user = "1234"
+# create a budget if new user user
+if not budget_manager.is_valid_user(user):
+    budget_manager.create_budget(total_budget=100, user=user)
 
 OPENAI_PRICING_MAP = {
     "gpt-3.5-turbo": {
@@ -81,7 +87,11 @@ class OpenAIChat(BaseLLM):
 
     async def _chat_api_call_impl(self, request: dict):
         try:
-            response = await openai.ChatCompletion.acreate(**request)
+            if budget_manager.get_current_cost(user=user) <= budget_manager.get_total_budget(user):
+                response = await openai.ChatCompletion.acreate(**request)
+                budget_manager.update_cost(completion_obj=response, user=user)
+            except: 
+                raise Exception('User budget exceeded')
             assert (
                 "content" in response["choices"][0]["message"]
             ), "No content in response"
