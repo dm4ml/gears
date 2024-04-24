@@ -37,7 +37,7 @@ llm = OpenAIChat("gpt-3.5-turbo", temperature=1.0)
 
 ## Create a Gear
 
-A `Gear` is a class that wraps an LLM API call. A `Gear` has a jinja-formatted prompt template, `transform` method to transform the output of the LLM into a context, and `switch` method to select the next `Gear` to run. `Gear` objects are initialized with an LLM object.
+A `Gear` is a class that wraps an LLM API call. A `Gear` has a jinja-formatted prompt prompt, `transform` method to transform the output of the LLM into a context, and `switch` method to select the next `Gear` to run. `Gear` objects are initialized with an LLM object.
 
 Here's a set of gears to provide a structured greeting:
 
@@ -45,7 +45,7 @@ Here's a set of gears to provide a structured greeting:
 from gears import Gear
 
 class ComplimentGear(Gear):
-    def template(self, context: GreetingContext):
+    def prompt(self, context: GreetingContext):
         return "Write a sentence to make someone named {{ context.name }} feel good about themselves."
 
     def transform(self, response: dict, context: GreetingContext):
@@ -57,7 +57,7 @@ class ComplimentGear(Gear):
         return WorldGear(context=context)
 
 class WorldGear(Gear):
-    def template(self, context: GreetingContext):
+    def prompt(self, context: GreetingContext):
         return "Now write a sentence that will make {{ context.name }} feel good about humanity."
 
     def transform(self, response: dict, context: GreetingContext):

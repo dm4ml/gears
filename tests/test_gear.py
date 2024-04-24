@@ -1,17 +1,16 @@
 from gears.gear import Gear
-from pydantic import BaseModel
-from gears import Gear, History
+from gears import Gear, History, Example
 from gears.llms import Echo
 from gears.utils import extract_first_json
 import pytest
 import random
 
 
-class Input(BaseModel):
+class Input(Example):
     name: str
 
 
-class Output(BaseModel):
+class Output(Example):
     name: str
     completion: str
 
@@ -22,8 +21,8 @@ echo_model = Echo()
 @pytest.mark.asyncio
 async def test_single_gear():
     class TestGear(Gear):
-        def template(self, context):
-            return "Hello {{ context.name }}"
+        def prompt(self, context):
+            return f"Hello { context.name }"
 
         def transform(self, response: str, inp: Input):
             return Output(name=inp.name, completion=response)
@@ -46,7 +45,7 @@ async def test_transform_error():
                 num_retries_on_transform_error=num_retries_on_transform_error,
             )
 
-        def template(self, context):
+        def prompt(self, context):
             return '{"hello:}'
 
         def transform(self, response: str, inp: Input):
@@ -68,8 +67,8 @@ async def test_transform_error():
 @pytest.mark.asyncio
 async def test_two_gears_list():
     class TestGear(Gear):
-        def template(self, context):
-            return "Hello {{ context.name }}"
+        def prompt(self, context):
+            return f"Hello { context.name }"
 
         def transform(self, response: str, inp: Input):
             return Output(name=inp.name, completion=response)
@@ -78,8 +77,8 @@ async def test_two_gears_list():
             return TestGear2(echo_model)
 
     class TestGear2(Gear):
-        def template(self, context):
-            return "Bye {{ context.name }}"
+        def prompt(self, context):
+            return f"Bye { context.name }"
 
         def transform(self, response: str, out: Output):
             return Output(name=out.name, completion=response)
@@ -95,22 +94,22 @@ async def test_two_gears_list():
 @pytest.mark.asyncio
 async def test_editable_history():
     class TestGear(Gear):
-        def template(self, context):
-            return "Hello {{ context.name }}"
+        def prompt(self, context):
+            return f"Hello { context.name }"
 
         def transform(self, response: str, inp: Input):
             return Output(name=inp.name, completion=response)
+
+        def editHistory(self, history: History, context: Example) -> History:
+            # Delete the last 2 messages
+            return history[:-2]
 
         def switch(self, response) -> Gear:
             return TestGear2(echo_model)
 
     class TestGear2(Gear):
-        def template(self, context):
-            return "Bye {{ context.name }}"
-
-        def editHistory(self, history: History, context: BaseModel) -> History:
-            # Delete the last 2 messages
-            return history[:-2]
+        def prompt(self, context):
+            return f"Bye { context.name }"
 
         def transform(self, response: str, out: Output):
             return Output(name=out.name, completion=response)
@@ -126,8 +125,8 @@ async def test_editable_history():
 @pytest.mark.asyncio
 async def test_three_gears_fork():
     class TestGear(Gear):
-        def template(self, context):
-            return "Hello {{ context.name }}"
+        def prompt(self, context):
+            return f"Hello { context.name }"
 
         def transform(self, response: str, inp: Input):
             return Output(name=inp.name, completion=response)
@@ -143,15 +142,15 @@ async def test_three_gears_fork():
                 raise ValueError("Name must be left or right")
 
     class TestGearLeft(Gear):
-        def template(self, context):
-            return "Left bye {{ context.name }}"
+        def prompt(self, context):
+            return f"Left bye { context.name }"
 
         def transform(self, response: str, out: Output):
             return Output(name=out.name, completion=response)
 
     class TestGearRight(Gear):
-        def template(self, context):
-            return "Right bye {{ context.name }}"
+        def prompt(self, context):
+            return f"Right bye { context.name }"
 
         def transform(self, response: str, out: Output):
             return Output(name=out.name, completion=response)
@@ -190,7 +189,7 @@ async def test_three_gears_fork():
 @pytest.mark.asyncio
 async def test_noop():
     class TestGear(Gear):
-        def template(self, context):
+        def prompt(self, context):
             return None
 
         def transform(self, response: str, inp: Input):

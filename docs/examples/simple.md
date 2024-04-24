@@ -59,7 +59,7 @@ We'll create a `Gear` that takes a natural language query and generates executab
 
 ```python linenums="24"
 class SQLGear(Gear):
-    def template(self, context: SQLContext):
+    def prompt(self, context: SQLContext):
         if context.exception:
             return "Your query failed to execute with the following error: {{ context.exception }}\n\nPlease try again. Output the SQL as a JSON with key `sql` and value equal to the SQL query for me to run."
 

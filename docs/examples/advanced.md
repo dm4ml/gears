@@ -36,7 +36,7 @@ We'll create a `Gear` that takes a home location and generates a destination and
 
 ```python linenums="14"
 class DestinationSelection(Gear):
-    def template(self, context: Suggestion):
+    def prompt(self, context: Suggestion):
         return "Suggest a city within a 4-5 hour flight that someone who lives in {{ context.home }} can travel to for a vacation. Pick a season that is best to travel to this destination in. Output the destination and season as a JSON with keys `destination` and `season` and values equal to the destination and season, respectively."
 
     def transform(self, response: dict, context: Suggestion):
@@ -55,7 +55,7 @@ class DestinationSelection(Gear):
 
 
 class IndoorOrOutdoor(Gear):
-    def template(self, context: Suggestion):
+    def prompt(self, context: Suggestion):
         return "Based on the expected weather at the destination in the {{ context.season }} season, can the person do outdoor activities? Output your answer as a JSON with key `outdoor` and value equal to `yes` or `no`, respectively."
 
     def transform(self, response: dict, context: Suggestion):
@@ -83,7 +83,7 @@ Now, we'll ask the LLM to select activities to do at the destination:
 
 ```python linenums="54"
 class OutdoorActivitySelection(Gear):
-    def template(self, context: Suggestion):
+    def prompt(self, context: Suggestion):
         return "Suggest a popular outdoor activity to do in the city of {{ context.destination }} during the season of {{ context.season }}."
 
     def transform(self, response: dict, context: Suggestion):
@@ -103,7 +103,7 @@ class OutdoorActivitySelection(Gear):
 
 
 class IndoorActivitySelection(Gear):
-    def template(self, context: Suggestion):
+    def prompt(self, context: Suggestion):
         # If there is already an indoor activity, prompt for a different one
         if context.activities:
             return "Suggest a different popular indoor activity to do in the city of {{ context.destination }} during the season of {{ context.season }}."
@@ -141,7 +141,7 @@ Finally, we'll ask the LLM to summarize the itinerary:
 
 ```python linenums="103"
 class SummarizeItinerary(Gear):
-    def template(self, context: Suggestion):
+    def prompt(self, context: Suggestion):
         return "Summarize your suggested activities: {{ context.activities }} into a short personalized vacation itinerary for someone who lives in {{ context.home }} to travel to {{ context.destination }} during the {{ context.season }} season."
 
     def transform(self, response: dict, context: Suggestion):

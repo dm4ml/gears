@@ -23,6 +23,7 @@ Intermediate = namedtuple(
         "result_context",
         "current_history",
         "new_history",
+        "model_response",
     ],
 )
 
@@ -143,27 +144,44 @@ class Session:
                 current_gear.__class__.__name__,
                 current_gear.version,
             )
+
             if key not in self.__intermediates:
                 self._logger.info(
                     f"Running {current_gear.__class__.__name__} on example {current_context.id}."
                 )
-                (result_context, new_history,) = await current_gear._runWithoutSwitch(
+                (
+                    model_response,
+                    result_context,
+                    new_history,
+                ) = await current_gear._runWithoutSwitch(
                     current_context, current_history
                 )
 
-                self.__intermediates[key] = Intermediate(
-                    current_context=current_context,
-                    result_context=result_context,
-                    current_history=current_history,
-                    new_history=new_history,
-                )
-
-                # Increment cost
-                self.__cost += new_history.cost - current_history.cost
             else:
+                # Run only transform method
+                model_response = self.__intermediates[key].model_response
+                (
+                    model_response,
+                    result_context,
+                    new_history,
+                ) = await current_gear._runWithoutSwitch(
+                    current_context, current_history, model_response
+                )
                 self._logger.debug(
                     f"Found intermediate result for {current_gear.__class__.__name__} on example {current_context.id}. Not running again."
                 )
+
+            # Store the intermediate result
+            self.__intermediates[key] = Intermediate(
+                current_context=current_context,
+                current_history=current_history,
+                new_history=new_history,
+                result_context=result_context,
+                model_response=model_response,
+            )
+
+            # Increment cost
+            self.__cost += new_history.cost - current_history.cost
 
             # Load which other gear to run, if any
             # We should always run this to detect version changes

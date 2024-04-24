@@ -4,7 +4,7 @@ This section describes the building blocks of Gears, including `Context`, `Histo
 
 ## Context
 
-A context is a [Pydantic model](https://docs.pydantic.dev/latest/) that represents any structured information flowing through your `Gear`s. Context attributes can be accessed in prompt templates, and context objects are passed throughout `Gear` methods.
+A context is a [Pydantic model](https://docs.pydantic.dev/latest/) that represents any structured information flowing through your `Gear`s. Context attributes can be accessed in prompt prompts, and context objects are passed throughout `Gear` methods.
 
 We use Pydantic because Pydantic automatically validates data types. To create a Pydantic object, simply subclass `pydantic.BaseModel`:
 
@@ -61,7 +61,7 @@ You will not be calling any methods on the LLM object directly---instead, you wi
 
 Your control flow will live within a `Gear` object. To create a gear, you must subclass `Gear` and implement the following methods:
 
-- `template`: A method that returns a jinja-formatted prompt template, using attributes from a context object.
+- `prompt`: A method that returns a jinja-formatted prompt prompt, using attributes from a context object.
 - `transform`: A method that transforms the response from the LLM and initial context into a new context object.
 - `switch`: A method that returns the next `Gear` to run, or `None` if the workflow should end.
 
@@ -71,7 +71,7 @@ Here's an example of a recursive `Gear` that asks a user to write a story, and t
 from gears import Gear
 
 class ExampleGear(Gear):
-    def template(self, context: SomeContext):
+    def prompt(self, context: SomeContext):
         if context.error:
             return "That story was too long! Keep your story under 100 characters."
         else:
@@ -99,8 +99,8 @@ class ExampleGear(Gear):
 
 The way to use a `Gear` is to initialize it with an LLM object, and then call the `run` method with an initial context object and history. The `run` lifecycle is as follows:
 
-1. `run` calls `template` to get a prompt template, passing in the context as a Jinja variable
-2. `run` calls the LLM API with the prompt template and the history
+1. `run` calls `prompt` to get a prompt prompt, passing in the context as a Jinja variable
+2. `run` calls the LLM API with the prompt prompt and the history
 3. `run` calls `transform` with the response from the LLM and the context object. `transform` returns a new context object. If `transform` doesn't return a Pydantic object, `gears` will throw an error.
 4. `run` calls `switch` with the new context object. If `switch` returns `None`, the workflow will end. Otherwise, the returned `Gear` will be run with the new context and history.
 

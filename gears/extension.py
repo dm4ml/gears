@@ -68,8 +68,8 @@ class GearMagics(Magics):
         # Check if --root is in the line parameters
         is_root = "--root" in line.split()
 
-        # Extract code blocks for template, transform, and __init__ methods
-        relevant_code = extract_method_code(cell, ["template", "transform", "__init__"])
+        # Extract code blocks for prompt, transform, and __init__ methods
+        relevant_code = extract_method_code(cell, ["prompt", "__init__", "editHistory"])
 
         # Calculate hash of the extracted code
         code_hash = hashlib.md5(relevant_code.encode()).hexdigest()

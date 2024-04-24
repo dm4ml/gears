@@ -748,7 +748,7 @@ testing = ["Django (<3.1)", "attrs", "colorama", "docopt", "pytest (<7.0.0)"]
 [[package]]
 name = "jinja2"
 version = "3.1.2"
-description = "A very fast and expressive template engine."
+description = "A very fast and expressive prompt engine."
 optional = false
 python-versions = ">=3.7"
 files = [

@@ -14,7 +14,7 @@ from gears import Gear, History
 from pydantic import BaseModel
 
 class ExampleGear(Gear):
-    def template(self, context: BaseModel) -> str:
+    def prompt(self, context: BaseModel) -> str:
         return "Hello, world!"
 
     def editHistory(self, history: History, context: BaseModel) -> History:

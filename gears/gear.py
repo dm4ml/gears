@@ -1,8 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple
-
-from jinja2 import Template
+from typing import Dict, Optional, Tuple
 
 from gears.example import Example
 from gears.history import History
@@ -37,7 +35,7 @@ class Gear(ABC):
 
     def editHistory(self, context: Example, history: History) -> History:
         """Optional method to implement that edits the chat history
-        before the gear is run. Default implementation does not
+        after the gear is run. Default implementation does not
         modify the history.
 
         Args:
@@ -51,20 +49,15 @@ class Gear(ABC):
 
     async def _askModel(
         self,
-        template_str: str,
+        prompt: str,
         edited_history: History,
-        context: Example,
         **kwargs,
     ):
         """Internal method to ask the model."""
-        if template_str is None:
+        if prompt is None:
             # Don't run the gear
             response = None
         else:
-            prompt = Template(template_str).render(context=context)
-            if not isinstance(prompt, str):
-                raise TypeError("Template must return a string")
-
             # Call the model
             logger.debug(f"Running model with prompt: {prompt}")
             response = await self.model.run(prompt, edited_history, **kwargs)
@@ -72,41 +65,56 @@ class Gear(ABC):
         return response
 
     async def _runWithoutSwitch(
-        self, context: Example, history: History, **kwargs
-    ) -> Tuple[Example, History]:
+        self,
+        context: Example,
+        history: History,
+        model_response: Dict = None,
+        **kwargs,
+    ) -> Tuple[Dict, Example, History]:
         """Runs the gear with the given context and history, without executing
         a switch method.
 
         Args:
-            context (Example): Input context for the gear. Must be a pydantic model. This is passed to the `template` method, which will construct the prompt for the LLM.
+            context (Example): Input context for the gear. Must be a pydantic model. This is passed to the `prompt` method, which will construct the prompt for the LLM.
             history (History): A chat history.
 
         Returns:
+            Dict: Raw response from the LLM.
             Example: The output context of the gear (result of `transform` method).
             History: The chat history after running the gear. This is a new object and does not modify the original history object.
         """
         # Transform the data from the response
-        num_transform_tries = 0
+        self.num_transform_tries = 0
 
-        # Construct the template with the pydantic model
+        # Construct the prompt with the pydantic model
         context_copy = context.model_copy()
-        template_str = self.template(context_copy)
-        edited_history = self.editHistory(context=context_copy, history=history)
+        prompt_str = self.prompt(context_copy)
 
-        while num_transform_tries <= self.num_retries_on_transform_error:
+        while self.num_transform_tries <= self.num_retries_on_transform_error:
             # Copy the edited history so that we don't modify the original
-            edited_history_copy = edited_history.copy()
+            history_copy = history.copy()
 
-            response = await self._askModel(
-                template_str, edited_history_copy, context_copy, **kwargs
+            model_response = (
+                await self._askModel(prompt_str, history_copy, **kwargs)
+                if model_response is None
+                else model_response
             )
+
             try:
-                response = self.transform(response, context_copy)
+                transformed_context = self.transform(model_response, context_copy)
+                break
+            except NotImplementedError:
+                transformed_context = context_copy
+                logger.debug(
+                    f"Transform method not implemented. No modifications to the context."
+                )
                 break
             except Exception as e:
-                num_transform_tries += 1
+                self.num_transform_tries += 1
+                # Reset model_response
+                model_response = None
 
-                if num_transform_tries > self.num_retries_on_transform_error:
+                if self.num_transform_tries > self.num_retries_on_transform_error:
                     raise e
                 else:
                     logger.warning(
@@ -114,10 +122,10 @@ class Gear(ABC):
                     )
 
         # Verify that the structured data is a pydantic model
-        if not isinstance(response, Example):
-            raise TypeError("Transform must return a pydantic model instance")
+        if not isinstance(transformed_context, Example):
+            raise TypeError("Transform must return an Example instance")
 
-        return response, edited_history_copy
+        return model_response, transformed_context, history_copy
 
     async def run(
         self,
@@ -128,11 +136,11 @@ class Gear(ABC):
         """Runs the gear with the given context and history. This is automatically called if executing a gear within a `switch` method; otherwise, it must be called manually for a top-level gear.
 
         Args:
-            context (Example): Input context for the gear. Must be a pydantic model. This is passed to the `template` method, which will construct the prompt for the LLM.
+            context (Example): Input context for the gear. Must be a pydantic model. This is passed to the `prompt` method, which will construct the prompt for the LLM.
             history (History): Chat history. This is passed to the LLM's `run` method.
 
         Raises:
-            TypeError: If the `template` method does not return a string.
+            TypeError: If the `prompt` method does not return a string.
             TypeError: If the `transform` method does not return a pydantic model.
             TypeError: If the `switch` method does not return a Gear instance or None.
 
@@ -140,57 +148,68 @@ class Gear(ABC):
             Example: The output context of the gear (result of `transform` method) if no gears are chained in the `switch` method; otherwise, the output context of the last gear in the chain.
         """
 
-        response, edited_history_copy = await self._runWithoutSwitch(
-            context, history, **kwargs
+        (
+            model_response,
+            transformed_context,
+            history_copy,
+        ) = await self._runWithoutSwitch(context, history, **kwargs)
+
+        # Edit the history
+        edited_history = self.editHistory(
+            context=transformed_context, history=history_copy
         )
 
         # Load which other gear to run, if any
         try:
-            child = self.switch(response)
+            child = self.switch(transformed_context)
             if isinstance(child, Gear):
-                response = await child.run(response, edited_history_copy, **kwargs)
+                response = await child.run(
+                    transformed_context, edited_history, **kwargs
+                )
             elif not child:
+                response = transformed_context
                 logger.debug("No child gear to run. Returning response.")
             else:
                 raise TypeError(f"Switch must return a Gear instance or None.")
 
         except NotImplementedError:
+            response = transformed_context
             pass
 
         # Change the original history object
-        history.resetFrom(edited_history_copy)
+        history.resetFrom(edited_history)
 
-        # If there is no child, return the response
+        # If there is no child, return the transformed_context
         return response
 
     @abstractmethod
-    def template(self, context: Example) -> str:
-        """Template for the LLM prompt. This is a jinja2 template that will be rendered with the given context.
+    def prompt(self, context: Example) -> str:
+        """Function that returns a prompt, given the context.
 
         Args:
-            context (Example): Pydantic model instance that will be used to render the template.
+            context (Example): Object that will be used as context in the prompt.
 
         Raises:
             NotImplementedError: If the gear does not implement this method.
 
         Returns:
-            str: Prompt template that will be rendered with the given context.
+            str: Prompt that will be passed to the model.
         """
-        raise NotImplementedError("Gear must implement prompt template")
+        raise NotImplementedError("Gear must implement prompt method")
 
     @abstractmethod
     def transform(self, response: dict, context: Example) -> Example:
-        """Transforms the response from the LLM into a pydantic model instance.
+        """Transforms the response from the LLM into an Example.
 
         Args:
             response (dict): Raw response from the LLM.
-            context (Example): Input context for the gear. Must be a pydantic model.
+            context (Example): Input context for the gear. Must be a Example instance.
 
         Raises:
             NotImplementedError: If the gear does not implement this method.
 
         Returns:
-            Example: New context for the gear. Must be a pydantic model instance.
+            Example: New context for the gear. Must be a Example instance.
         """
         raise NotImplementedError("Gear must implement transform method")
 

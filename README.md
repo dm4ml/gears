@@ -6,7 +6,7 @@ Gears is a lightweight tool for writing control flow with LLMs with **full contr
 
 Gears is so minimal; it is simply a wrapper around an LLM API call that:
 
-- Allows you to specify your prompts as [Jinja templates](https://jinja.palletsprojects.com/en/3.1.x/) and inputs as [Pydantic models](https://docs.pydantic.dev/latest/)
+- Allows you to specify your prompts as [Jinja prompts](https://jinja.palletsprojects.com/en/3.1.x/) and inputs as [Pydantic models](https://docs.pydantic.dev/latest/)
 - Automatically handles LLM API failures with [exponential backoff](https://tenacity.readthedocs.io/en/latest/)
 - Allows you to specify control flow, based on LLM responses, in a simple, declarative way
 
