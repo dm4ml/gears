@@ -86,14 +86,14 @@ class Gear(ABC):
             History: The chat history after running the gear. This is a new object and does not modify the original history object.
         """
         # Transform the data from the response
-        num_transform_tries = 0
+        self.num_transform_tries = 0
 
         # Construct the template with the pydantic model
         context_copy = context.model_copy()
         template_str = self.template(context_copy)
         edited_history = self.editHistory(context=context_copy, history=history)
 
-        while num_transform_tries <= self.num_retries_on_transform_error:
+        while self.num_transform_tries <= self.num_retries_on_transform_error:
             # Copy the edited history so that we don't modify the original
             edited_history_copy = edited_history.copy()
 
@@ -104,9 +104,9 @@ class Gear(ABC):
                 response = self.transform(response, context_copy)
                 break
             except Exception as e:
-                num_transform_tries += 1
+                self.num_transform_tries += 1
 
-                if num_transform_tries > self.num_retries_on_transform_error:
+                if self.num_transform_tries > self.num_retries_on_transform_error:
                     raise e
                 else:
                     logger.warning(
