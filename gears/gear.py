@@ -84,13 +84,13 @@ class Gear(ABC):
         """
 
         # Transform the data from the response
-        num_transform_tries = 0
+        self.num_transform_tries = 0
 
         # Construct the template with the pydantic model
         template_str = self.template(context)
         edited_history = self.editHistory(context=context, history=history)
 
-        while num_transform_tries <= self.num_retries_on_transform_error:
+        while self.num_transform_tries <= self.num_retries_on_transform_error:
             # Copy the edited history so that we don't modify the original
             edited_history_copy = edited_history.copy()
 
@@ -101,9 +101,9 @@ class Gear(ABC):
                 response = self.transform(response, context)
                 break
             except Exception as e:
-                num_transform_tries += 1
+                self.num_transform_tries += 1
 
-                if num_transform_tries > self.num_retries_on_transform_error:
+                if self.num_transform_tries > self.num_retries_on_transform_error:
                     raise e
                 else:
                     logger.warning(
